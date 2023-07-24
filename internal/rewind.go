@@ -1,6 +1,9 @@
 package internal
 
-import "os"
+import (
+	"io"
+	"os"
+)
 
 type Assets struct {
 	Path string
@@ -26,6 +29,18 @@ type Sources struct {
 	Root     *Root
 	Shared   *Shared
 	Versions []Version
+}
+
+type Book struct {
+	Root     *Root
+	Versions []Version
+}
+
+func (s *Sources) BuildBook(path string) *Book {
+	return &Book{
+		Root:     s.Root,
+		Versions: s.Versions,
+	}
 }
 
 // FindSources finds the sources for a book.
@@ -66,6 +81,67 @@ func FindSources(root string) (sources *Sources, err error) {
 	}
 
 	return sources, err
+}
+
+// copyFile copies a file from sourcePath to destPath
+// It takes two string arguments: sourcePath and destPath
+// It creates the destination file if it does not exist
+// It overwrites the destination file if it exists
+// It returns an error if the copy fails
+func copyFile(sourcePath string, destPath string, fileName string) (err error) {
+	r, err := os.Open(sourcePath + "/" + fileName)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	//if the directory does not exist, create it
+	if _, err := os.Stat(destPath); os.IsNotExist(err) {
+		err = os.MkdirAll(destPath, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	w, err := os.Create(destPath + "/" + fileName)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if c := w.Close(); c != nil && err == nil {
+			err = c
+		}
+	}()
+
+	_, err = io.Copy(w, r)
+	return err
+}
+
+// findAssets finds the documents for the book.
+// It takes a directory entry and an Assets struct.
+// It returns an error.
+// It will recurse over any subdirectories and place all shared assets at the same level.
+func findAssets(path string, assets *Assets) (err error) {
+	assets.Path = path
+
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			assets.Docs = append(assets.Docs, entry)
+		} else {
+			err = findAssets(path+"/"+entry.Name(), assets)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // findShared finds the shared documents for the book.
@@ -110,30 +186,4 @@ func findVersion(path string, entry os.DirEntry) (version *Version, err error) {
 
 	return version, nil
 
-}
-
-// findAssets finds the documents for the book.
-// It takes a directory entry and an Assets struct.
-// It returns an error.
-// It will recurse over any subdirectories and place all shared assets at the same level.
-func findAssets(path string, assets *Assets) (err error) {
-	assets.Path = path
-
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			assets.Docs = append(assets.Docs, entry)
-		} else {
-			err = findAssets(path+"/"+entry.Name(), assets)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
