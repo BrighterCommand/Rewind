@@ -6,14 +6,32 @@ import (
 )
 
 type Assets struct {
-	Path string
-	Docs []os.DirEntry
+	DestPath   string
+	SourcePath string
+	Docs       map[string]Doc
+}
+
+type Book struct {
+	Root     *Root
+	Versions []Version
+}
+
+type Doc struct {
+	Version string
+	Storage os.DirEntry
 }
 
 type Root struct {
-	Path    string
-	Summary os.DirEntry
-	GitBook os.DirEntry
+	DestPath   string
+	SourcePath string
+	Summary    os.DirEntry
+	GitBook    os.DirEntry
+}
+
+type Sources struct {
+	Root     *Root
+	Shared   *Shared
+	Versions []Version
 }
 
 type Shared struct {
@@ -25,22 +43,28 @@ type Version struct {
 	Version string
 }
 
-type Sources struct {
-	Root     *Root
-	Shared   *Shared
-	Versions []Version
-}
-
-type Book struct {
-	Root     *Root
-	Versions []Version
-}
-
 func (s *Sources) BuildBook(path string) *Book {
-	return &Book{
-		Root:     s.Root,
-		Versions: s.Versions,
+	book := &Book{
+		Root: s.Root,
 	}
+
+	for _, version := range s.Versions {
+		bookVersion := &Version{
+			Version: version.Version,
+		}
+
+		//copy shared assets first
+		for key, doc := range s.Shared.Assets.Docs {
+			bookVersion.Assets.Docs[key] = doc
+		}
+
+		//now copy assets for this version and overwrite any shared assets with the same name
+		for key, doc := range version.Assets.Docs {
+			bookVersion.Assets.Docs[key] = doc
+		}
+	}
+
+	return book
 }
 
 // FindSources finds the sources for a book.
@@ -55,7 +79,7 @@ func FindSources(root string) (sources *Sources, err error) {
 	}
 
 	sources = &Sources{
-		Root:     &Root{Path: root},
+		Root:     &Root{SourcePath: root},
 		Shared:   &Shared{},
 		Versions: []Version{},
 	}
@@ -122,8 +146,8 @@ func copyFile(sourcePath string, destPath string, fileName string) (err error) {
 // It takes a directory entry and an Assets struct.
 // It returns an error.
 // It will recurse over any subdirectories and place all shared assets at the same level.
-func findAssets(path string, assets *Assets) (err error) {
-	assets.Path = path
+func findAssets(path string, version string, assets *Assets) (err error) {
+	assets.SourcePath = path
 
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -132,9 +156,9 @@ func findAssets(path string, assets *Assets) (err error) {
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
-			assets.Docs = append(assets.Docs, entry)
+			assets.Docs[entry.Name()] = Doc{Version: version, Storage: entry}
 		} else {
-			err = findAssets(path+"/"+entry.Name(), assets)
+			err = findAssets(path+"/"+entry.Name(), version, assets)
 			if err != nil {
 				return err
 			}
@@ -150,13 +174,13 @@ func findAssets(path string, assets *Assets) (err error) {
 func findShared(path string, entry os.DirEntry) (shared *Shared, err error) {
 	shared = &Shared{
 		Assets: &Assets{
-			Docs: []os.DirEntry{},
+			Docs: make(map[string]Doc),
 		},
 	}
 
 	sharedPath := path + "/" + entry.Name()
 
-	err = findAssets(sharedPath, shared.Assets)
+	err = findAssets(sharedPath, "Shared", shared.Assets)
 	if err != nil {
 		return shared, err
 	}
@@ -172,14 +196,14 @@ func findVersion(path string, entry os.DirEntry) (version *Version, err error) {
 
 	version = &Version{
 		Assets: &Assets{
-			Docs: []os.DirEntry{},
+			Docs: make(map[string]Doc),
 		},
 		Version: entry.Name(),
 	}
 
 	versionPath := path + "/" + entry.Name()
 
-	err = findAssets(versionPath, version.Assets)
+	err = findAssets(versionPath, version.Version, version.Assets)
 	if err != nil {
 		return version, err
 	}
