@@ -13,7 +13,7 @@ type Assets struct {
 
 type Book struct {
 	Root     *Root
-	Versions []Version
+	Versions map[string]Version
 }
 
 type Doc struct {
@@ -31,7 +31,7 @@ type Root struct {
 type Sources struct {
 	Root     *Root
 	Shared   *Shared
-	Versions []Version
+	Versions map[string]Version
 }
 
 type Shared struct {
@@ -43,14 +43,26 @@ type Version struct {
 	Version string
 }
 
-func (s *Sources) BuildBook(path string) *Book {
+func (s *Sources) BuildBook(destPath string) *Book {
 	book := &Book{
-		Root: s.Root,
+		Root: &Root{
+			DestPath:   destPath,
+			SourcePath: s.Root.SourcePath,
+			Summary:    s.Root.Summary,
+			GitBook:    s.Root.GitBook,
+		},
+		Versions: make(map[string]Version),
 	}
 
-	for _, version := range s.Versions {
-		bookVersion := &Version{
+	for key, version := range s.Versions {
+
+		var bookVersion = &Version{
 			Version: version.Version,
+			Assets: &Assets{
+				DestPath:   destPath + "/" + version.Version,
+				SourcePath: version.Assets.SourcePath,
+				Docs:       make(map[string]Doc),
+			},
 		}
 
 		//copy shared assets first
@@ -62,6 +74,8 @@ func (s *Sources) BuildBook(path string) *Book {
 		for key, doc := range version.Assets.Docs {
 			bookVersion.Assets.Docs[key] = doc
 		}
+
+		book.Versions[key] = *bookVersion
 	}
 
 	return book
@@ -81,7 +95,7 @@ func FindSources(root string) (sources *Sources, err error) {
 	sources = &Sources{
 		Root:     &Root{SourcePath: root},
 		Shared:   &Shared{},
-		Versions: []Version{},
+		Versions: make(map[string]Version),
 	}
 
 	for _, entry := range entries {
@@ -100,7 +114,7 @@ func FindSources(root string) (sources *Sources, err error) {
 			if err != nil {
 				return nil, err
 			}
-			sources.Versions = append(sources.Versions, *version)
+			sources.Versions[entry.Name()] = *version
 		}
 	}
 

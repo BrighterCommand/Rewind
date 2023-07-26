@@ -78,11 +78,11 @@ func TestFindSources(t *testing.T) {
 		t.Errorf("Expected 2 versions, got %d", len(versions))
 	} else {
 
-		if versions[0].Version != "10.0.0" {
-			t.Errorf("Expected 9.0.0, got %s", versions[0].Version)
+		if versions["10.0.0"].Version != "10.0.0" {
+			t.Errorf("Expected 9.0.0, got %s", versions["10.0.0"].Version)
 		}
-		if versions[1].Version != "9.0.0" {
-			t.Errorf("Expected 9.0.0, got %s", versions[1].Version)
+		if versions["9.0.0"].Version != "9.0.0" {
+			t.Errorf("Expected 9.0.0, got %s", versions["9.0.0"].Version)
 		}
 	}
 }
@@ -151,17 +151,17 @@ func TestBookBuilder(t *testing.T) {
 		t.Errorf("Expected 2 versions, got %d", len(book.Versions))
 	}
 
-	firstVersion := book.Versions[0]
-	if firstVersion.Version != "10.0.0" {
-		t.Errorf("Expected 10.0.0, got %s", book.Versions[0].Version)
+	firstVersion := book.Versions["9.0.0"]
+	if firstVersion.Version != "9.0.0" {
+		t.Errorf("Expected 9.0.0, got %s", book.Versions["9.0.0"].Version)
 	}
 
-	if firstVersion.Assets.SourcePath != sources.Versions[0].Assets.SourcePath {
-		t.Errorf("Expected %s, got %s", sources.Versions[0].Assets.SourcePath, firstVersion.Assets.SourcePath)
+	if firstVersion.Assets.SourcePath != sources.Versions["9.0.0"].Assets.SourcePath {
+		t.Errorf("Expected %s, got %s", sources.Versions["9.0.0"].Assets.SourcePath, firstVersion.Assets.SourcePath)
 	}
 
-	if firstVersion.Assets.DestPath != fmt.Sprintf("%s/10.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/10.0.0", destPath), firstVersion.Assets.DestPath)
+	if firstVersion.Assets.DestPath != fmt.Sprintf("%s/9.0.0", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/9.0.0", destPath), firstVersion.Assets.DestPath)
 	}
 
 	//NOTE: this won't tell us which version of a document in shared and version we got, which we need to consider
@@ -169,20 +169,19 @@ func TestBookBuilder(t *testing.T) {
 		t.Errorf("Expected 3 docs, got %d", len(firstVersion.Assets.Docs))
 	}
 
-	secondVersion := book.Versions[1]
-	if secondVersion.Version != "9.0.0" {
-		t.Errorf("Expected 9.0.0, got %s", book.Versions[1].Version)
+	secondVersion := book.Versions["10.0.0"]
+	if secondVersion.Version != "10.0.0" {
+		t.Errorf("Expected 10.0.0, got %s", book.Versions["10.0.0"].Version)
 	}
 
-	if secondVersion.Assets.SourcePath != sources.Versions[1].Assets.SourcePath {
-		t.Errorf("Expected %s, got %s", sources.Versions[1].Assets.SourcePath, secondVersion.Assets.SourcePath)
+	if secondVersion.Assets.SourcePath != sources.Versions["10.0.0"].Assets.SourcePath {
+		t.Errorf("Expected %s, got %s", sources.Versions["10.0.0"].Assets.SourcePath, secondVersion.Assets.SourcePath)
 	}
 
-	if secondVersion.Assets.DestPath != fmt.Sprintf("%s/9.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/9.0.0", destPath), secondVersion.Assets.DestPath)
+	if secondVersion.Assets.DestPath != fmt.Sprintf("%s/10.0.0", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/10.0.0", destPath), secondVersion.Assets.DestPath)
 	}
 
-	//NOTE: this won't tell us which version of a document in shared and version we got, which we need to consider
 	if len(secondVersion.Assets.Docs) != 3 {
 		t.Errorf("Expected 3 docs, got %d", len(secondVersion.Assets.Docs))
 	}
@@ -207,22 +206,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 				Docs:       make(map[string]Doc),
 			},
 		},
-		Versions: []Version{
-			Version{
-				Assets: &Assets{
-					SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
-					Docs:       make(map[string]Doc),
-				},
-				Version: "9.0.0",
-			},
-			Version{
-				Assets: &Assets{
-					SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
-					Docs:       make(map[string]Doc),
-				},
-				Version: "10.0.0",
-			},
-		},
+		Versions: make(map[string]Version),
 	}
 
 	//add shared docs
@@ -244,15 +228,34 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
+	//add versions
+	sources.Versions["9.0.0"] = Version{
+		Assets: &Assets{
+			SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
+			Docs:       make(map[string]Doc),
+		},
+		Version: "9.0.0",
+	}
+
+	sources.Versions["10.0.0"] = Version{
+		Assets: &Assets{
+			SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
+			Docs:       make(map[string]Doc),
+		},
+		Version: "10.0.0",
+	}
+
 	//add version docs
-	sources.Versions[0].Assets.Docs["DocumentTwo.md"] = Doc{
-		Version: "9.0.0", Storage: fakeDirEntry{
+	sources.Versions["9.0.0"].Assets.Docs["DocumentTwo.md"] = Doc{
+		Version: "9.0.0",
+		Storage: fakeDirEntry{
 			name:  "DocumentTwo.md",
 			isDir: false,
 		}}
 
-	sources.Versions[1].Assets.Docs["DocumentThree.md"] = Doc{
-		Version: "10.0.0", Storage: fakeDirEntry{
+	sources.Versions["10.0.0"].Assets.Docs["DocumentThree.md"] = Doc{
+		Version: "10.0.0",
+		Storage: fakeDirEntry{
 			name:  "DocumentThree.md",
 			isDir: false,
 		}}
