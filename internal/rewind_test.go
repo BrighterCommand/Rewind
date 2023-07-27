@@ -46,15 +46,15 @@ func TestFindSources(t *testing.T) {
 	}
 
 	root := sources.Root
-	if root.Summary == nil || root.Summary.Name() != "SUMMARY.md" {
+	if root.Summary.Storage.Name() != "SUMMARY.md" {
 		t.Errorf("Expected SUMMARY.md")
 	}
 
-	if root.GitBook == nil || root.GitBook.Name() != ".gitbook.yaml" {
+	if root.GitBook.Storage.Name() != ".gitbook.yaml" {
 		t.Errorf("Expected .gitbook.yaml")
 	}
 
-	docs := sources.Shared.Assets.Docs
+	docs := sources.Shared.Docs
 
 	if len(docs) != 3 {
 		t.Errorf("Expected 3 documents, got %d", len(docs))
@@ -134,129 +134,289 @@ func TestBookBuilder(t *testing.T) {
 		t.Errorf("Error building book: %s", err)
 	}
 
-	if book.Root.SourcePath != sourcePath {
-		t.Errorf("Expected %s but found %s", sourcePath, book.Root.SourcePath)
-	}
 	if book.Root.DestPath != destPath {
 		t.Errorf("Expected %s but found %s", destPath, book.Root.DestPath)
 	}
-	if book.Root.Summary.Name() != sources.Root.Summary.Name() {
-		t.Errorf("Expected %s but found %s", sources.Root.Summary.Name(), book.Root.Summary.Name())
+
+	if book.Root.Summary.Storage.Name() != sources.Root.Summary.Storage.Name() {
+		t.Errorf("Expected %s but found %s", sources.Root.Summary.Storage.Name(), book.Root.Summary.Storage.Name())
 	}
-	if book.Root.GitBook.Name() != sources.Root.GitBook.Name() {
-		t.Errorf("Expected %s but found %s", sources.Root.GitBook.Name(), book.Root.GitBook.Name())
+
+	if book.Root.Summary.SourcePath != sourcePath {
+		t.Errorf("Expected %s but found %s", sourcePath, book.Root.Summary.SourcePath)
+	}
+
+	if book.Root.GitBook.Storage.Name() != sources.Root.GitBook.Storage.Name() {
+		t.Errorf("Expected %s but found %s", sources.Root.GitBook.Storage.Name(), book.Root.GitBook.Storage.Name())
+	}
+
+	if book.Root.GitBook.SourcePath != sourcePath {
+		t.Errorf("Expected %s but found %s", sourcePath, book.Root.GitBook.SourcePath)
 	}
 
 	if len(book.Versions) != 2 {
 		t.Errorf("Expected 2 versions, got %d", len(book.Versions))
 	}
 
-	firstVersion := book.Versions["9.0.0"]
-	if firstVersion.Version != "9.0.0" {
+	versionNine := book.Versions["9.0.0"]
+	if versionNine.Version != "9.0.0" {
 		t.Errorf("Expected 9.0.0, got %s", book.Versions["9.0.0"].Version)
 	}
 
-	if firstVersion.Assets.SourcePath != sources.Versions["9.0.0"].Assets.SourcePath {
-		t.Errorf("Expected %s, got %s", sources.Versions["9.0.0"].Assets.SourcePath, firstVersion.Assets.SourcePath)
+	if versionNine.DestPath != fmt.Sprintf("%s/9.0.0", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/9.0.0", destPath), versionNine.DestPath)
 	}
 
-	if firstVersion.Assets.DestPath != fmt.Sprintf("%s/9.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/9.0.0", destPath), firstVersion.Assets.DestPath)
+	if len(versionNine.Docs) != 3 {
+		t.Errorf("Expected 3 docs, got %d", len(versionNine.Docs))
 	}
 
-	//NOTE: this won't tell us which version of a document in shared and version we got, which we need to consider
-	if len(firstVersion.Assets.Docs) != 3 {
-		t.Errorf("Expected 3 docs, got %d", len(firstVersion.Assets.Docs))
+	var expectedSourcePath string = fmt.Sprintf("%s/9.0.0", sourcePath)
+	sharedSourcePath := fmt.Sprintf("%s/Shared", sourcePath)
+	var documentOneFound, documentTwoFound, documentThreeFound bool
+	for _, doc := range versionNine.Docs {
+
+		if doc.Storage.Name() == "DocumentOne.md" {
+			if !strings.EqualFold(doc.SourcePath, sharedSourcePath) {
+				t.Errorf("Expected %s, got %s", sharedSourcePath, doc.SourcePath)
+			} else {
+				documentOneFound = true
+			}
+		}
+
+		if doc.Storage.Name() == "DocumentTwo.md" {
+			if !strings.EqualFold(doc.SourcePath, expectedSourcePath) {
+				t.Errorf("Expected %s, got %s", expectedSourcePath, doc.SourcePath)
+			} else {
+				documentTwoFound = true
+			}
+		}
+		if doc.Storage.Name() == "DocumentThree.md" {
+			if !strings.EqualFold(doc.SourcePath, sharedSourcePath) {
+				t.Errorf("Expected %s, got %s", sharedSourcePath, doc.SourcePath)
+			} else {
+				documentThreeFound = true
+			}
+		}
 	}
 
-	secondVersion := book.Versions["10.0.0"]
-	if secondVersion.Version != "10.0.0" {
+	if !(documentOneFound && documentTwoFound && documentThreeFound) {
+		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md in v9.0.0")
+	}
+
+	versionTen := book.Versions["10.0.0"]
+	if versionTen.Version != "10.0.0" {
 		t.Errorf("Expected 10.0.0, got %s", book.Versions["10.0.0"].Version)
 	}
 
-	if secondVersion.Assets.SourcePath != sources.Versions["10.0.0"].Assets.SourcePath {
-		t.Errorf("Expected %s, got %s", sources.Versions["10.0.0"].Assets.SourcePath, secondVersion.Assets.SourcePath)
+	if versionTen.DestPath != fmt.Sprintf("%s/10.0.0", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/10.0.0", destPath), versionTen.DestPath)
 	}
 
-	if secondVersion.Assets.DestPath != fmt.Sprintf("%s/10.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/10.0.0", destPath), secondVersion.Assets.DestPath)
+	if len(versionTen.Docs) != 3 {
+		t.Errorf("Expected 3 docs, got %d", len(versionTen.Docs))
 	}
 
-	if len(secondVersion.Assets.Docs) != 3 {
-		t.Errorf("Expected 3 docs, got %d", len(secondVersion.Assets.Docs))
+	expectedSourcePath = fmt.Sprintf("%s/10.0.0", sourcePath)
+	sharedSourcePath = fmt.Sprintf("%s/Shared", sourcePath)
+	for _, doc := range versionTen.Docs {
+
+		if doc.Storage.Name() == "DocumentOne.md" {
+			if !strings.EqualFold(doc.SourcePath, expectedSourcePath) {
+				t.Errorf("Expected %s, got %s", expectedSourcePath, doc.SourcePath)
+			} else {
+				documentOneFound = true
+			}
+		}
+
+		if doc.Storage.Name() == "DocumentTwo.md" {
+			if !strings.EqualFold(doc.SourcePath, sharedSourcePath) {
+				t.Errorf("Expected %s, got %s", sharedSourcePath, doc.SourcePath)
+			} else {
+				documentTwoFound = true
+			}
+		}
+		if doc.Storage.Name() == "DocumentThree.md" {
+			if !strings.EqualFold(doc.SourcePath, sharedSourcePath) {
+				t.Errorf("Expected %s, got %s", sharedSourcePath, doc.SourcePath)
+			} else {
+				documentThreeFound = true
+			}
+		}
 	}
+
+	if !(documentOneFound && documentTwoFound && documentThreeFound) {
+		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md in v10.0.0")
+	}
+}
+
+func TestBookCreation(t *testing.T) {
+
+	mydir, err := os.Getwd()
+	if err != nil {
+		t.Errorf("Error getting working directory: %s", err)
+	}
+
+	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
+	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
+
+	sources, err := FindSources(sourcePath)
+	if err != nil {
+		t.Errorf("Error finding sources: %s", err)
+	}
+
+	book := sources.BuildBook(destPath)
+
+	err = book.Create()
+	if err != nil {
+		t.Errorf("Error creating book: %s", err)
+	}
+
+	entries, err := os.ReadDir(destPath)
+	if err != nil {
+		t.Errorf("Error reading directory: %s", err)
+	}
+
+	var summaryFound, gitbookFound, v9Found, v10Found bool
+	for _, entry := range entries {
+		if entry.Name() == "SUMMARY.md" {
+			summaryFound = true
+		} else if entry.Name() == ".gitbook.yaml" {
+			gitbookFound = true
+		} else if entry.IsDir() {
+			if entry.Name() == "9.0.0" {
+				v9entries, err := os.ReadDir(fmt.Sprintf("%s/9.0.0", destPath))
+				if err != nil {
+					t.Errorf("Error reading directory: %s", err)
+					v9Found = false
+				} else {
+					v9Found = findFiles(v9entries)
+				}
+			} else if entry.Name() == "10.0.0" {
+				v10entries, err := os.ReadDir(fmt.Sprintf("%s/10.0.0", destPath))
+				if err != nil {
+					t.Errorf("Error reading directory: %s", err)
+					v10Found = false
+				} else {
+					v10Found = findFiles(v10entries)
+				}
+			}
+		}
+	}
+
+	if summaryFound == false {
+		t.Errorf("Expected SUMMARY.md")
+	}
+
+	if gitbookFound == false {
+		t.Errorf("Expected .gitbook.yaml")
+	}
+
+	if v9Found == false {
+		t.Errorf("Expected 9.0.0")
+	}
+
+	if v10Found == false {
+		t.Errorf("Expected 10.0.0")
+	}
+
+	// Remove the directory
+	err = os.RemoveAll(destPath)
+	if err != nil {
+		t.Errorf("Error removing directory: %s", err)
+	}
+}
+
+func findFiles(entries []os.DirEntry) bool {
+	var documentOneFound, documentTwoFound, documentThreeFound bool
+	for _, doc := range entries {
+		if doc.Name() == "DocumentOne.md" {
+			documentOneFound = true
+		}
+		if doc.Name() == "DocumentTwo.md" {
+			documentTwoFound = true
+		}
+		if doc.Name() == "DocumentThree.md" {
+			documentThreeFound = true
+		}
+	}
+	return documentOneFound && documentTwoFound && documentThreeFound
 }
 
 func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	sources := &Sources{
 		Root: &Root{
-			SourcePath: sourcePath,
-			Summary: fakeDirEntry{
-				name:  "SUMMARY.md",
-				isDir: false,
+			Summary: Doc{
+				SourcePath: sourcePath,
+				Storage: fakeDirEntry{
+					name:  "SUMMARY.md",
+					isDir: false,
+				},
 			},
-			GitBook: fakeDirEntry{
-				name:  ".gitbook.yaml",
-				isDir: false,
+			GitBook: Doc{
+				SourcePath: sourcePath,
+				Storage: fakeDirEntry{
+					name:  ".gitbook.yaml",
+					isDir: false,
+				},
 			},
 		},
 		Shared: &Shared{
-			Assets: &Assets{
-				SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
-				Docs:       make(map[string]Doc),
-			},
+			Docs: make(map[string]Doc),
 		},
 		Versions: make(map[string]Version),
 	}
 
 	//add shared docs
-	sources.Shared.Assets.Docs["DocumentOne.md"] = Doc{
-		Version: "Shared", Storage: fakeDirEntry{
+	sources.Shared.Docs["DocumentOne.md"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
 			name:  "DocumentOne.md",
 			isDir: false,
 		}}
 
-	sources.Shared.Assets.Docs["DocumentTwo.md"] = Doc{
-		Version: "Shared", Storage: fakeDirEntry{
+	sources.Shared.Docs["DocumentTwo.md"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
 			name:  "DocumentTwo.md",
 			isDir: false,
 		}}
 
-	sources.Shared.Assets.Docs["DocumentThree.md"] = Doc{
-		Version: "Shared", Storage: fakeDirEntry{
+	sources.Shared.Docs["DocumentThree.md"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
 			name:  "DocumentThree.md",
 			isDir: false,
 		}}
 
 	//add versions
 	sources.Versions["9.0.0"] = Version{
-		Assets: &Assets{
-			SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
-			Docs:       make(map[string]Doc),
-		},
+		Docs:    make(map[string]Doc),
 		Version: "9.0.0",
 	}
 
 	sources.Versions["10.0.0"] = Version{
-		Assets: &Assets{
-			SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
-			Docs:       make(map[string]Doc),
-		},
+		Docs:    make(map[string]Doc),
 		Version: "10.0.0",
 	}
 
 	//add version docs
-	sources.Versions["9.0.0"].Assets.Docs["DocumentTwo.md"] = Doc{
-		Version: "9.0.0",
+	sources.Versions["9.0.0"].Docs["DocumentTwo.md"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
+		Version:    "9.0.0",
 		Storage: fakeDirEntry{
 			name:  "DocumentTwo.md",
 			isDir: false,
 		}}
 
-	sources.Versions["10.0.0"].Assets.Docs["DocumentThree.md"] = Doc{
-		Version: "10.0.0",
+	sources.Versions["10.0.0"].Docs["DocumentOne.md"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
+		Version:    "10.0.0",
 		Storage: fakeDirEntry{
-			name:  "DocumentThree.md",
+			name:  "DocumentOne.md",
 			isDir: false,
 		}}
 
