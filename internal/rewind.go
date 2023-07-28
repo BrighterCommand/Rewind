@@ -7,11 +7,13 @@ import (
 
 type Shared struct {
 	Docs map[string]Doc
+	TOC  Doc
 }
 
 type Version struct {
 	DestPath string
 	Docs     map[string]Doc
+	TOC      Doc
 	Version  string
 }
 

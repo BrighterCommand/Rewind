@@ -1,0 +1,11 @@
+Brighter Configuration:
+- name   : Document One
+  file   : DocumentOne.md
+  indent : 1
+- name : Document Two
+  file : DocumentTwo.md
+  indent : 2
+Darker Configuration:
+- name   : Document Three
+  file   : DocumentThree.md
+  indent : 1
