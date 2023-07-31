@@ -33,33 +33,44 @@ func (f fakeDirEntry) Info() (os.FileInfo, error) {
 
 func TestFindSources(t *testing.T) {
 
-	mydir, err := os.Getwd()
+	myDir, err := os.Getwd()
 	if err != nil {
 		t.Errorf("Error getting working directory: %s", err)
 	}
 
-	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
+	sourcePath := strings.Replace(myDir, "internal", "test/source", 1)
 
-	sources, err := FindSources(sourcePath)
+	sources := NewSources()
+	err = sources.FindFromPath(sourcePath)
 	if err != nil {
 		t.Errorf("Error finding sources: %s", err)
 	}
 
+	checkRoot(t, sources)
+
+	checkShared(t, sources)
+
+	checkVersions(t, sources)
+}
+
+func checkRoot(t *testing.T, sources *Sources) {
 	root := sources.Root
-	if root.Summary.Storage.Name() != "SUMMARY.md" {
-		t.Errorf("Expected SUMMARY.md")
-	}
 
 	if root.GitBook.Storage.Name() != ".gitbook.yaml" {
 		t.Errorf("Expected .gitbook.yaml")
 	}
+}
 
+func checkShared(t *testing.T, sources *Sources) {
 	docs := sources.Shared.Docs
 
-	if len(docs) != 3 {
+	if len(docs) != 4 {
 		t.Errorf("Expected 3 documents, got %d", len(docs))
 	} else {
-		//note order here as sort is alphabetical
+		if docs[".toc.yaml"].Storage.Name() != ".toc.yaml" {
+			t.Errorf("Expected .toc.yaml, got %s", docs[".toc.yaml"])
+		}
+
 		if docs["DocumentOne.md"].Storage.Name() != "DocumentOne.md" {
 			t.Errorf("Expected DocumentOne.md, got %s", docs["DocumentOne.md"])
 		}
@@ -72,7 +83,10 @@ func TestFindSources(t *testing.T) {
 			t.Errorf("Expected DocumentThree.md, got %s", docs["DocumentThree.md"])
 		}
 	}
+	return
+}
 
+func checkVersions(t *testing.T, sources *Sources) {
 	versions := sources.Versions
 	if len(versions) != 2 {
 		t.Errorf("Expected 2 versions, got %d", len(versions))
@@ -80,9 +94,39 @@ func TestFindSources(t *testing.T) {
 
 		if versions["10.0.0"].Version != "10.0.0" {
 			t.Errorf("Expected 9.0.0, got %s", versions["10.0.0"].Version)
+		} else {
+			docs := versions["10.0.0"].Docs
+			if len(docs) != 3 {
+				t.Errorf("Expected 3 documents, got %d", len(docs))
+			} else {
+				if docs[".toc.yaml"].Storage.Name() != ".toc.yaml" {
+					t.Errorf("Expected .toc.yaml, got %s", docs[".toc.yaml"])
+				}
+
+				if docs["DocumentOne.md"].Storage.Name() != "DocumentOne.md" {
+					t.Errorf("Expected DocumentOne.md, got %s", docs["DocumentOne.md"])
+				}
+
+				if docs["DocumentFour.md"].Storage.Name() != "DocumentFour.md" {
+					t.Errorf("Expected DocumentFour.md, got %s", docs["DocumentFour.md"])
+				}
+			}
 		}
 		if versions["9.0.0"].Version != "9.0.0" {
 			t.Errorf("Expected 9.0.0, got %s", versions["9.0.0"].Version)
+		} else {
+			docs := versions["9.0.0"].Docs
+			if len(docs) != 2 {
+				t.Errorf("Expected 2 documents, got %d", len(docs))
+			} else {
+				if docs[".toc.yaml"].Storage.Name() != ".toc.yaml" {
+					t.Errorf("Expected .toc.yaml, got %s", docs[".toc.yaml"])
+				}
+
+				if docs["DocumentTwo.md"].Storage.Name() != "DocumentTwo.md" {
+					t.Errorf("Expected DocumentTwo.md, got %s", docs["DocumentTwo.md"])
+				}
+			}
 		}
 	}
 }
@@ -126,16 +170,31 @@ func TestBookBuilder(t *testing.T) {
 	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
 	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
-	sources := sourceTestDataBuilder(sourcePath, mydir)
-
-	book := sources.BuildBook(destPath)
-
+	var sources = sourceTestDataBuilder(sourcePath, mydir)
+	var book = sources.BuildBook(destPath)
 	if book == nil {
 		t.Errorf("Error building book: %s", err)
 	}
 
+	checkBookRoot(t, book, destPath, sources, sourcePath)
+
+	if len(book.Versions) != 2 {
+		t.Errorf("Expected 2 versions, got %d", len(book.Versions))
+	}
+
+	checkVersion9(t, book, destPath, sourcePath)
+
+	checkVersion10(t, book, destPath, sourcePath)
+}
+
+func checkBookRoot(t *testing.T, book *Book, destPath string, sources *Sources, sourcePath string) {
 	if book.Root.DestPath != destPath {
 		t.Errorf("Expected %s but found %s", destPath, book.Root.DestPath)
+	}
+
+	if book.Root.Summary.Storage == nil {
+		t.Errorf("Expected Summary Document")
+		return
 	}
 
 	if book.Root.Summary.Storage.Name() != sources.Root.Summary.Storage.Name() {
@@ -146,6 +205,11 @@ func TestBookBuilder(t *testing.T) {
 		t.Errorf("Expected %s but found %s", sourcePath, book.Root.Summary.SourcePath)
 	}
 
+	if book.Root.GitBook.Storage == nil {
+		t.Errorf("Expected GitBook Document")
+		return
+	}
+
 	if book.Root.GitBook.Storage.Name() != sources.Root.GitBook.Storage.Name() {
 		t.Errorf("Expected %s but found %s", sources.Root.GitBook.Storage.Name(), book.Root.GitBook.Storage.Name())
 	}
@@ -153,10 +217,10 @@ func TestBookBuilder(t *testing.T) {
 	if book.Root.GitBook.SourcePath != sourcePath {
 		t.Errorf("Expected %s but found %s", sourcePath, book.Root.GitBook.SourcePath)
 	}
+}
 
-	if len(book.Versions) != 2 {
-		t.Errorf("Expected 2 versions, got %d", len(book.Versions))
-	}
+func checkVersion9(t *testing.T, book *Book, destPath string, sourcePath string) {
+	var documentOneFound, documentTwoFound, documentThreeFound bool
 
 	versionNine := book.Versions["9.0.0"]
 	if versionNine.Version != "9.0.0" {
@@ -171,11 +235,9 @@ func TestBookBuilder(t *testing.T) {
 		t.Errorf("Expected 3 docs, got %d", len(versionNine.Docs))
 	}
 
-	var expectedSourcePath string = fmt.Sprintf("%s/9.0.0", sourcePath)
+	var expectedSourcePath = fmt.Sprintf("%s/9.0.0", sourcePath)
 	sharedSourcePath := fmt.Sprintf("%s/Shared", sourcePath)
-	var documentOneFound, documentTwoFound, documentThreeFound bool
 	for _, doc := range versionNine.Docs {
-
 		if doc.Storage.Name() == "DocumentOne.md" {
 			if !strings.EqualFold(doc.SourcePath, sharedSourcePath) {
 				t.Errorf("Expected %s, got %s", sharedSourcePath, doc.SourcePath)
@@ -203,6 +265,11 @@ func TestBookBuilder(t *testing.T) {
 	if !(documentOneFound && documentTwoFound && documentThreeFound) {
 		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md in v9.0.0")
 	}
+	return
+}
+
+func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string) {
+	var documentOneFound, documentTwoFound, documentThreeFound bool
 
 	versionTen := book.Versions["10.0.0"]
 	if versionTen.Version != "10.0.0" {
@@ -217,8 +284,8 @@ func TestBookBuilder(t *testing.T) {
 		t.Errorf("Expected 3 docs, got %d", len(versionTen.Docs))
 	}
 
-	expectedSourcePath = fmt.Sprintf("%s/10.0.0", sourcePath)
-	sharedSourcePath = fmt.Sprintf("%s/Shared", sourcePath)
+	expectedSourcePath := fmt.Sprintf("%s/10.0.0", sourcePath)
+	sharedSourcePath := fmt.Sprintf("%s/Shared", sourcePath)
 	for _, doc := range versionTen.Docs {
 
 		if doc.Storage.Name() == "DocumentOne.md" {
@@ -252,22 +319,23 @@ func TestBookBuilder(t *testing.T) {
 
 func TestBookCreation(t *testing.T) {
 
-	mydir, err := os.Getwd()
+	myDir, err := os.Getwd()
 	if err != nil {
 		t.Errorf("Error getting working directory: %s", err)
 	}
 
-	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
-	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
+	sourcePath := strings.Replace(myDir, "internal", "test/source", 1)
+	destPath := strings.Replace(myDir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
-	sources, err := FindSources(sourcePath)
+	sources := NewSources()
+	err = sources.FindFromPath(sourcePath)
 	if err != nil {
 		t.Errorf("Error finding sources: %s", err)
 	}
 
 	book := sources.BuildBook(destPath)
 
-	err = book.Create()
+	err = book.Make()
 	if err != nil {
 		t.Errorf("Error creating book: %s", err)
 	}
@@ -346,13 +414,6 @@ func findFiles(entries []os.DirEntry) bool {
 func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	sources := &Sources{
 		Root: &Root{
-			Summary: Doc{
-				SourcePath: sourcePath,
-				Storage: fakeDirEntry{
-					name:  "SUMMARY.md",
-					isDir: false,
-				},
-			},
 			GitBook: Doc{
 				SourcePath: sourcePath,
 				Storage: fakeDirEntry{
@@ -368,6 +429,14 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	}
 
 	//add shared docs
+	sources.Shared.Docs[".toc.yaml"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
+			name:  ".toc.yaml",
+			isDir: false,
+		}}
+
 	sources.Shared.Docs["DocumentOne.md"] = Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
 		Version:    "shared",
@@ -404,6 +473,14 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	}
 
 	//add version docs
+	sources.Versions["9.0.0"].Docs[".toc.yaml"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
+		Version:    "9.0.0",
+		Storage: fakeDirEntry{
+			name:  ".toc.yaml",
+			isDir: false,
+		}}
+
 	sources.Versions["9.0.0"].Docs["DocumentTwo.md"] = Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
 		Version:    "9.0.0",

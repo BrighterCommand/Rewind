@@ -34,7 +34,16 @@ type Book struct {
 	Versions map[string]Version
 }
 
-func (b *Book) Create() error {
+func NewBook(destPath string) *Book {
+	return &Book{
+		Root: &Root{
+			DestPath: destPath,
+		},
+		Versions: make(map[string]Version),
+	}
+}
+
+func (b *Book) Make() error {
 
 	//create root directory
 	rootPath := b.Root.DestPath
@@ -78,22 +87,7 @@ func (b *Book) Create() error {
 	return nil
 }
 
-type Sources struct {
-	Root     *Root
-	Shared   *Shared
-	Versions map[string]Version
-}
-
-func (s *Sources) BuildBook(destPath string) *Book {
-	book := &Book{
-		Root: &Root{
-			DestPath: destPath,
-			Summary:  s.Root.Summary,
-			GitBook:  s.Root.GitBook,
-		},
-		Versions: make(map[string]Version),
-	}
-
+func (b *Book) MakeVersions(s *Sources, destPath string) {
 	for key, version := range s.Versions {
 
 		var bookVersion = &Version{
@@ -112,56 +106,73 @@ func (s *Sources) BuildBook(destPath string) *Book {
 			bookVersion.Docs[key] = doc
 		}
 
-		book.Versions[key] = *bookVersion
+		b.Versions[key] = *bookVersion
 	}
-
-	return book
 }
 
-// FindSources finds the sources for a book.
-// It takes a root directory as a string.
-// It returns a Sources struct.
-// The Sources struct contains the root directory, shared documents, and versioned documents.
-func FindSources(root string) (sources *Sources, err error) {
+type Sources struct {
+	Root     *Root
+	Shared   *Shared
+	Versions map[string]Version
+}
 
-	entries, err := os.ReadDir(root)
-	if err != nil {
-		return nil, err
-	}
-
-	sources = &Sources{
+func NewSources() *Sources {
+	return &Sources{
 		Root:     &Root{},
 		Shared:   &Shared{},
 		Versions: make(map[string]Version),
 	}
+}
+
+func (s *Sources) BuildBook(destPath string) *Book {
+
+	book := NewBook(destPath)
+
+	book.Root.GitBook = s.Root.GitBook
+
+	book.MakeVersions(s, destPath)
+
+	return book
+}
+
+// FindFromPath finds the sources for a book.
+// It takes a root directory as a string.
+// It returns a Sources struct.
+// The Sources struct contains the root directory, shared documents, and versioned documents.
+func (s *Sources) FindFromPath(root string) error {
+
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return err
+	}
 
 	for _, entry := range entries {
 		if entry.Name() == "SUMMARY.md" {
-			sources.Root.Summary = Doc{
+			s.Root.Summary = Doc{
 				SourcePath: root,
 				Storage:    entry,
 			}
 		} else if entry.Name() == ".gitbook.yaml" {
-			sources.Root.GitBook = Doc{
+			s.Root.GitBook = Doc{
 				SourcePath: root,
 				Storage:    entry,
 			}
 		} else if entry.IsDir() && entry.Name() == "shared" {
 			shared, err := findShared(root, entry)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			sources.Shared = shared
+			s.Shared = shared
 		} else if entry.IsDir() {
 			version, err := findVersion(root, entry)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			sources.Versions[entry.Name()] = *version
+			s.Versions[entry.Name()] = *version
 		}
 	}
 
-	return sources, err
+	return err
 }
 
 // copyFile copies a file from sourcePath to destPath
@@ -174,7 +185,9 @@ func copyFile(sourcePath string, destPath string, fileName string) (err error) {
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer func(r *os.File) {
+		_ = r.Close()
+	}(r)
 
 	//if the directory does not exist, create it
 	if _, err := os.Stat(destPath); os.IsNotExist(err) {
