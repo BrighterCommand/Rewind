@@ -37,14 +37,21 @@ func checkRoot(t *testing.T, sources *Sources) {
 }
 
 func checkShared(t *testing.T, sources *Sources) {
+
+	if sources.Shared == nil {
+		t.Errorf("Expected shared documents")
+		return
+	}
+
+	if sources.Shared.TOC.Storage == nil || sources.Shared.TOC.Storage.Name() != ".toc.yaml" {
+		t.Errorf("Expected .toc.yaml, got %s", sources.Shared.TOC)
+	}
+
 	docs := sources.Shared.Docs
 
-	if len(docs) != 4 {
+	if len(docs) != 3 {
 		t.Errorf("Expected 3 documents, got %d", len(docs))
 	} else {
-		if docs[".toc.yaml"].Storage.Name() != ".toc.yaml" {
-			t.Errorf("Expected .toc.yaml, got %s", docs[".toc.yaml"])
-		}
 
 		if docs["DocumentOne.md"].Storage.Name() != "DocumentOne.md" {
 			t.Errorf("Expected DocumentOne.md, got %s", docs["DocumentOne.md"])
@@ -70,13 +77,16 @@ func checkVersions(t *testing.T, sources *Sources) {
 		if versions["10.0.0"].Version != "10.0.0" {
 			t.Errorf("Expected 9.0.0, got %s", versions["10.0.0"].Version)
 		} else {
-			docs := versions["10.0.0"].Docs
-			if len(docs) != 3 {
+			version := versions["10.0.0"]
+
+			if version.TOC.Storage == nil || version.TOC.Storage.Name() != ".toc.yaml" {
+				t.Errorf("Expected .toc.yaml, got %s", version.TOC)
+			}
+
+			docs := version.Docs
+			if len(docs) != 2 {
 				t.Errorf("Expected 3 documents, got %d", len(docs))
 			} else {
-				if docs[".toc.yaml"].Storage.Name() != ".toc.yaml" {
-					t.Errorf("Expected .toc.yaml, got %s", docs[".toc.yaml"])
-				}
 
 				if docs["DocumentOne.md"].Storage.Name() != "DocumentOne.md" {
 					t.Errorf("Expected DocumentOne.md, got %s", docs["DocumentOne.md"])
@@ -90,13 +100,16 @@ func checkVersions(t *testing.T, sources *Sources) {
 		if versions["9.0.0"].Version != "9.0.0" {
 			t.Errorf("Expected 9.0.0, got %s", versions["9.0.0"].Version)
 		} else {
-			docs := versions["9.0.0"].Docs
-			if len(docs) != 2 {
+			version := versions["9.0.0"]
+
+			if version.TOC.Storage == nil || version.TOC.Storage.Name() != ".toc.yaml" {
+				t.Errorf("Expected .toc.yaml, got %s", version.TOC)
+			}
+
+			docs := version.Docs
+			if len(docs) != 1 {
 				t.Errorf("Expected 2 documents, got %d", len(docs))
 			} else {
-				if docs[".toc.yaml"].Storage.Name() != ".toc.yaml" {
-					t.Errorf("Expected .toc.yaml, got %s", docs[".toc.yaml"])
-				}
 
 				if docs["DocumentTwo.md"].Storage.Name() != "DocumentTwo.md" {
 					t.Errorf("Expected DocumentTwo.md, got %s", docs["DocumentTwo.md"])

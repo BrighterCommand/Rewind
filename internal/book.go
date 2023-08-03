@@ -63,7 +63,7 @@ func (b *Book) Publish() error {
 	return nil
 }
 
-func (b *Book) makeVersions(s *Sources, destPath string) {
+func (b *Book) MakeVersions(s *Sources, destPath string) {
 	for key, version := range s.Versions {
 
 		var bookVersion = &Version{

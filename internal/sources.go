@@ -22,7 +22,7 @@ func (s *Sources) BuildBook(destPath string) *Book {
 
 	book.Root.GitBook = s.Root.GitBook
 
-	book.makeVersions(s, destPath)
+	book.MakeVersions(s, destPath)
 
 	return book
 }
@@ -80,7 +80,11 @@ func findVersionedDocs(path string, version *Version) (err error) {
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
-			version.Docs[entry.Name()] = Doc{SourcePath: path, Version: version.Version, Storage: entry}
+			if entry.Name() == ".toc.yaml" {
+				version.TOC = Doc{SourcePath: path, Version: version.Version, Storage: entry}
+			} else {
+				version.Docs[entry.Name()] = Doc{SourcePath: path, Version: version.Version, Storage: entry}
+			}
 		} else {
 			err = findVersionedDocs(path+"/"+entry.Name(), version)
 			if err != nil {
@@ -105,7 +109,11 @@ func findSharedDocs(path string, shared *Shared) (err error) {
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
-			shared.Docs[entry.Name()] = Doc{SourcePath: path, Version: "Shared", Storage: entry}
+			if entry.Name() == ".toc.yaml" {
+				shared.TOC = Doc{SourcePath: path, Version: "Shared", Storage: entry}
+			} else {
+				shared.Docs[entry.Name()] = Doc{SourcePath: path, Version: "Shared", Storage: entry}
+			}
 		} else {
 			err = findSharedDocs(path+"/"+entry.Name(), shared)
 			if err != nil {

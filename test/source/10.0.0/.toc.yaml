@@ -1,2 +1,7 @@
 Brighter Configuration:
-  - DocumentFour.md
+  - filename: DocumentOne.md
+    title: Document One
+    indent: 1
+  - filename: DocumentTwo.md
+    title: Document Two
+    indent: 1
