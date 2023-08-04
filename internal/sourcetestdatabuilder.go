@@ -46,7 +46,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	}
 
 	//add shared docs
-	sources.Shared.Docs[".toc.yaml"] = Doc{
+	sources.Shared.TOC = Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
@@ -89,8 +89,9 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		Version: "10.0.0",
 	}
 
-	//add version docs
-	sources.Versions["9.0.0"].Docs[".toc.yaml"] = Doc{
+	//add versionNine docs
+	versionNine := sources.Versions["9.0.0"]
+	versionNine.TOC = Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
 		Version:    "9.0.0",
 		Storage: fakeDirEntry{
@@ -98,7 +99,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	sources.Versions["9.0.0"].Docs["DocumentTwo.md"] = Doc{
+	versionNine.Docs["DocumentTwo.md"] = Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
 		Version:    "9.0.0",
 		Storage: fakeDirEntry{
@@ -106,11 +107,28 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	sources.Versions["10.0.0"].Docs["DocumentOne.md"] = Doc{
+	versionTen := sources.Versions["10.0.0"]
+	versionTen.TOC = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
+		Version:    "10.0.0",
+		Storage: fakeDirEntry{
+			name:  ".toc.yaml",
+			isDir: false,
+		}}
+
+	versionTen.Docs["DocumentOne.md"] = Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{
 			name:  "DocumentOne.md",
+			isDir: false,
+		}}
+
+	versionTen.Docs["DocumentFour.md"] = Doc{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
+		Version:    "10.0.0",
+		Storage: fakeDirEntry{
+			name:  "DocumentFour.md",
 			isDir: false,
 		}}
 

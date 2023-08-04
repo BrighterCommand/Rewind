@@ -146,7 +146,7 @@ func checkVersion9(t *testing.T, book *Book, destPath string, sourcePath string)
 }
 
 func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string) {
-	var documentOneFound, documentTwoFound, documentThreeFound bool
+	var documentOneFound, documentTwoFound, documentThreeFound, documentFourFound bool
 
 	versionTen := book.Versions["10.0.0"]
 	if versionTen.Version != "10.0.0" {
@@ -157,7 +157,7 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/10.0.0", destPath), versionTen.DestPath)
 	}
 
-	if len(versionTen.Docs) != 3 {
+	if len(versionTen.Docs) != 4 {
 		t.Errorf("Expected 3 docs, got %d", len(versionTen.Docs))
 	}
 
@@ -180,6 +180,7 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 				documentTwoFound = true
 			}
 		}
+
 		if doc.Storage.Name() == "DocumentThree.md" {
 			if !strings.EqualFold(doc.SourcePath, sharedSourcePath) {
 				t.Errorf("Expected %s, got %s", sharedSourcePath, doc.SourcePath)
@@ -187,10 +188,18 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 				documentThreeFound = true
 			}
 		}
+
+		if doc.Storage.Name() == "DocumentFour.md" {
+			if !strings.EqualFold(doc.SourcePath, expectedSourcePath) {
+				t.Errorf("Expected %s, got %s", expectedSourcePath, doc.SourcePath)
+			} else {
+				documentFourFound = true
+			}
+		}
 	}
 
-	if !(documentOneFound && documentTwoFound && documentThreeFound) {
-		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md in v10.0.0")
+	if !(documentOneFound && documentTwoFound && documentThreeFound && documentFourFound) {
+		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md, DocumentFour.md in v10.0.0")
 	}
 }
 
