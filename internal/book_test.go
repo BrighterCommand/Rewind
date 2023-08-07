@@ -2,6 +2,9 @@ package internal
 
 import (
 	"fmt"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/md"
+	"github.com/gomarkdown/markdown/parser"
 	"github.com/google/uuid"
 	"os"
 	"strings"
@@ -67,19 +70,6 @@ func TestBookBuilder(t *testing.T) {
 func checkBookRoot(t *testing.T, book *Book, destPath string, sources *Sources, sourcePath string) {
 	if book.Root.DestPath != destPath {
 		t.Errorf("Expected %s but found %s", destPath, book.Root.DestPath)
-	}
-
-	if book.Root.Summary.Storage == nil {
-		t.Errorf("Expected Summary Document")
-		return
-	}
-
-	if book.Root.Summary.Storage.Name() != sources.Root.Summary.Storage.Name() {
-		t.Errorf("Expected %s but found %s", sources.Root.Summary.Storage.Name(), book.Root.Summary.Storage.Name())
-	}
-
-	if book.Root.Summary.SourcePath != sourcePath {
-		t.Errorf("Expected %s but found %s", sourcePath, book.Root.Summary.SourcePath)
 	}
 
 	if book.Root.GitBook.Storage == nil {
@@ -201,6 +191,57 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 	if !(documentOneFound && documentTwoFound && documentThreeFound && documentFourFound) {
 		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md, DocumentFour.md in v10.0.0")
 	}
+}
+
+// TestBuildTableOfContents tests the BuildTOC function.
+// It creates a fake directory structure and then runs the BuildTOC function.
+func TestBuildTableOfContents(t *testing.T) {
+
+	mydir, err := os.Getwd()
+	if err != nil {
+		t.Errorf("Error getting working directory: %s", err)
+	}
+
+	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
+	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
+
+	var sources = sourceTestDataBuilder(sourcePath, mydir)
+	var book = sources.BuildBook(destPath)
+	if book == nil {
+		t.Errorf("Error building book: %s", err)
+	}
+
+	book.BuildTOC()
+
+	checkTOC(t, book)
+}
+
+func checkTOC(t *testing.T, book *Book) {
+
+	if book.Root.Summary.Storage == nil || book.Root.Summary.Storage.Name() != "SUMMARY.md" {
+		t.Errorf("Expected a file for SUMMARY.md")
+	}
+
+	//load the file and read the yaml
+	//we would expect to see a map of toc entries
+	//corresponding to relevant documents
+
+	mdFile, err := os.ReadFile(book.Root.Summary.SourcePath + "/" + book.Root.Summary.Storage.Name())
+	if err != nil {
+		t.Errorf("Error reading file: %s", err)
+	}
+
+	ext := parser.CommonExtensions | parser.OrderedListStart
+	parser := parser.NewWithExtensions(ext)
+	renderer := md.NewRenderer()
+	doc := markdown.Parse(mdFile, parser)
+	got := markdown.Render(doc, renderer)
+	toc := fmt.Sprintf("%s", got)
+
+	if toc != "## v9.0.0\n### Brighter Configuration\n* [Document One](/v9.0.0/DocumentOne.md)\n* [Document Two](/v9.0.0/DocumentTwo.md)\n### Darker Configuration\n* [Document Three](/v9.0.0/DocumentThree.md)\n## v10.0.0\n### Brighter Configuration\n* [Document One](/v10.0.0/DocumentOne.md)\n* [Document Two](/v10.0.0/DocumentTwo.md)\n* [Document Four](/v10.0.0/DocumentFour.md)\n### Darker Configuration\n* [Document Three](/v10.0.0/DocumentThree.md)\n" {
+		t.Errorf("Expected empty string, got %s", toc)
+	}
+
 }
 
 func TestBookCreation(t *testing.T) {

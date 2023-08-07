@@ -25,3 +25,8 @@ type Root struct {
 	Summary  Doc
 	GitBook  Doc
 }
+
+type TOCEntry struct {
+	FileName string
+	Title    string
+}

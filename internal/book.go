@@ -3,6 +3,7 @@ package internal
 import (
 	"io"
 	"os"
+	"strings"
 )
 
 type Book struct {
@@ -84,6 +85,32 @@ func (b *Book) MakeVersions(s *Sources, destPath string) {
 
 		b.Versions[key] = *bookVersion
 	}
+}
+
+func (b *Book) BuildTOC() error {
+
+	myDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	sourcePath := strings.Replace(myDir, "internal", "test/summary", 1)
+
+	entries, err := os.ReadDir(sourcePath)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if entry.Name() == "SUMMARY.md" {
+			b.Root.Summary = Doc{
+				SourcePath: sourcePath,
+				Storage:    entry,
+			}
+		}
+	}
+
+	return nil
 }
 
 // copyFile copies a file from sourcePath to destPath

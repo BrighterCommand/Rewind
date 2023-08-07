@@ -55,7 +55,7 @@ func (s *Sources) FindFromPath(root string) error {
 				return err
 			}
 			s.Shared = shared
-		} else if entry.IsDir() {
+		} else if entry.IsDir() && entry.Name() != "summary" {
 			version, err := findVersion(root, entry)
 			if err != nil {
 				return err
