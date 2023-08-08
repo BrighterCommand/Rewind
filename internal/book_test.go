@@ -213,18 +213,23 @@ func TestBuildTableOfContents(t *testing.T) {
 
 	book.BuildTOC()
 
-	checkTOC(t, book)
+	checkTOC(t, book, sourcePath, destPath)
 }
 
-func checkTOC(t *testing.T, book *Book) {
+func checkTOC(t *testing.T, book *Book, sourcePath string, destPath string) {
 
 	if book.Root.Summary.Storage == nil || book.Root.Summary.Storage.Name() != "SUMMARY.md" {
 		t.Errorf("Expected a file for SUMMARY.md")
 	}
 
-	//load the file and read the yaml
-	//we would expect to see a map of toc entries
-	//corresponding to relevant documents
+	//In a book, the SUMMARY.md file is always copied to the destpath
+	if book.Root.DestPath != destPath {
+		t.Errorf("Expected %s, got %s", destPath, book.Root.Summary.SourcePath)
+	}
+
+	if book.Root.Summary.SourcePath != sourcePath+"/"+"summary" {
+		t.Errorf("Expected %s, got %s", sourcePath+"/"+"summary", book.Root.Summary.SourcePath)
+	}
 
 	mdFile, err := os.ReadFile(book.Root.Summary.SourcePath + "/" + book.Root.Summary.Storage.Name())
 	if err != nil {
