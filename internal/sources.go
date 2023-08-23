@@ -24,6 +24,8 @@ func (s *Sources) BuildBook(destPath string) *Book {
 
 	book.MakeVersions(s, destPath)
 
+	book.MakeTOC(s, destPath)
+
 	return book
 }
 

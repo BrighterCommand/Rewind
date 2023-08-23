@@ -65,6 +65,8 @@ func TestBookBuilder(t *testing.T) {
 	checkVersion9(t, book, destPath, sourcePath)
 
 	checkVersion10(t, book, destPath, sourcePath)
+
+	checkTOC(t, book, sourcePath, destPath)
 }
 
 func checkBookRoot(t *testing.T, book *Book, destPath string, sources *Sources, sourcePath string) {
@@ -191,29 +193,6 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 	if !(documentOneFound && documentTwoFound && documentThreeFound && documentFourFound) {
 		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md, DocumentFour.md in v10.0.0")
 	}
-}
-
-// TestBuildTableOfContents tests the BuildTOC function.
-// It creates a fake directory structure and then runs the BuildTOC function.
-func TestBuildTableOfContents(t *testing.T) {
-
-	mydir, err := os.Getwd()
-	if err != nil {
-		t.Errorf("Error getting working directory: %s", err)
-	}
-
-	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
-	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
-
-	var sources = sourceTestDataBuilder(sourcePath, mydir)
-	var book = sources.BuildBook(destPath)
-	if book == nil {
-		t.Errorf("Error building book: %s", err)
-	}
-
-	book.BuildTOC()
-
-	checkTOC(t, book, sourcePath, destPath)
 }
 
 func checkTOC(t *testing.T, book *Book, sourcePath string, destPath string) {

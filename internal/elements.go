@@ -27,6 +27,7 @@ type Root struct {
 }
 
 type TOCEntry struct {
-	FileName string
-	Title    string
+	Name   string
+	File   string
+	Indent int
 }

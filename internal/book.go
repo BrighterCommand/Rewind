@@ -1,9 +1,10 @@
 package internal
 
 import (
+	"gopkg.in/yaml.v3"
 	"io"
+	"log"
 	"os"
-	"strings"
 )
 
 type Book struct {
@@ -87,27 +88,25 @@ func (b *Book) MakeVersions(s *Sources, destPath string) {
 	}
 }
 
-func (b *Book) BuildTOC() error {
+func (b *Book) MakeTOC(s *Sources, destPath string) error {
 
-	myDir, err := os.Getwd()
-	if err != nil {
-		return err
+	//find the shared .toc.yaml file
+	//find the versioned .toc.yaml file
+	//build a map for the toc entries
+	//export as markdown
+
+	file, error := os.ReadFile(s.Shared.TOC.SourcePath + "/" + s.Shared.TOC.Storage.Name())
+	if error != nil {
+		log.Fatal(error)
+		return error
 	}
 
-	sourcePath := strings.Replace(myDir, "internal", "test/summary", 1)
+	toc := make(map[string][]TOCEntry)
 
-	entries, err := os.ReadDir(sourcePath)
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range entries {
-		if entry.Name() == "SUMMARY.md" {
-			b.Root.Summary = Doc{
-				SourcePath: sourcePath,
-				Storage:    entry,
-			}
-		}
+	error = yaml.Unmarshal(file, &toc)
+	if error != nil {
+		log.Fatal(error)
+		return error
 	}
 
 	return nil
