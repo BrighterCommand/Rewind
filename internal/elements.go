@@ -4,13 +4,13 @@ import "os"
 
 type Shared struct {
 	Docs map[string]Doc
-	TOC  Doc
+	TOC  *Doc
 }
 
 type Version struct {
 	DestPath string
 	Docs     map[string]Doc
-	TOC      Doc
+	TOC      *Doc
 	Version  string
 }
 
@@ -22,8 +22,8 @@ type Doc struct {
 
 type Root struct {
 	DestPath string
-	Summary  Doc
-	GitBook  Doc
+	Summary  *Doc
+	GitBook  *Doc
 }
 
 type TOCEntry struct {

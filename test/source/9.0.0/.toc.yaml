@@ -1,4 +1,4 @@
 Brighter Configuration:
-  - filename: DocumentTwo.md
-    title: Document Two
+  - name : Document Two
+    file : DocumentTwo.md
     indent: 2

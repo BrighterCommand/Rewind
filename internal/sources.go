@@ -16,7 +16,7 @@ func NewSources() *Sources {
 	}
 }
 
-func (s *Sources) BuildBook(destPath string) *Book {
+func (s *Sources) BuildBook(destPath string) (*Book, error) {
 
 	book := newBook(destPath)
 
@@ -24,9 +24,12 @@ func (s *Sources) BuildBook(destPath string) *Book {
 
 	book.MakeVersions(s, destPath)
 
-	book.MakeTOC(s, destPath)
+	error := book.MakeTOC(s, destPath)
+	if error != nil {
+		return nil, error
+	}
 
-	return book
+	return book, nil
 }
 
 // FindFromPath finds the sources for a book.
@@ -42,12 +45,12 @@ func (s *Sources) FindFromPath(root string) error {
 
 	for _, entry := range entries {
 		if entry.Name() == "SUMMARY.md" {
-			s.Root.Summary = Doc{
+			s.Root.Summary = &Doc{
 				SourcePath: root,
 				Storage:    entry,
 			}
 		} else if entry.Name() == ".gitbook.yaml" {
-			s.Root.GitBook = Doc{
+			s.Root.GitBook = &Doc{
 				SourcePath: root,
 				Storage:    entry,
 			}
@@ -83,7 +86,7 @@ func findVersionedDocs(path string, version *Version) (err error) {
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			if entry.Name() == ".toc.yaml" {
-				version.TOC = Doc{SourcePath: path, Version: version.Version, Storage: entry}
+				version.TOC = &Doc{SourcePath: path, Version: version.Version, Storage: entry}
 			} else {
 				version.Docs[entry.Name()] = Doc{SourcePath: path, Version: version.Version, Storage: entry}
 			}
@@ -112,7 +115,7 @@ func findSharedDocs(path string, shared *Shared) (err error) {
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			if entry.Name() == ".toc.yaml" {
-				shared.TOC = Doc{SourcePath: path, Version: "Shared", Storage: entry}
+				shared.TOC = &Doc{SourcePath: path, Version: "Shared", Storage: entry}
 			} else {
 				shared.Docs[entry.Name()] = Doc{SourcePath: path, Version: "Shared", Storage: entry}
 			}

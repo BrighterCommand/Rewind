@@ -51,8 +51,8 @@ func TestBookBuilder(t *testing.T) {
 	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
 	var sources = sourceTestDataBuilder(sourcePath, mydir)
-	var book = sources.BuildBook(destPath)
-	if book == nil {
+	var book, error = sources.BuildBook(destPath)
+	if error != nil {
 		t.Errorf("Error building book: %s", err)
 	}
 
@@ -244,7 +244,10 @@ func TestBookCreation(t *testing.T) {
 		t.Errorf("Error finding sources: %s", err)
 	}
 
-	book := sources.BuildBook(destPath)
+	book, err := sources.BuildBook(destPath)
+	if err != nil {
+		t.Errorf("Error building book: %s", err)
+	}
 
 	err = book.Publish()
 	if err != nil {

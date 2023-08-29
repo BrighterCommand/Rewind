@@ -22,8 +22,9 @@ docs - the root level files for a GitBook project. Readme, Summary, etc
 
 ## Building the documentation
 
-When we build the documentation for a version, we copy shared, then each earlier version in turn i.e. we build v2 by
-copying shared, then v1, then v2. This means that we can change v1 and it will be reflected in all later versions.
+When we build the documentation for a version, we copy shared, then the documentation for each version. This means that 
+if you have shared and V1 and V2, you will need to include docs from V1 that should appear in V2, within V2. In a later
+version we may change this so that we include V1 within V2, but for now, we are keeping it simple.
 
 ## Table of Contents
 

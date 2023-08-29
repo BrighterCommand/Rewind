@@ -31,7 +31,7 @@ func (f fakeDirEntry) Info() (os.FileInfo, error) {
 func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	sources := &Sources{
 		Root: &Root{
-			GitBook: Doc{
+			GitBook: &Doc{
 				SourcePath: sourcePath,
 				Storage: fakeDirEntry{
 					name:  ".gitbook.yaml",
@@ -46,7 +46,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	}
 
 	//add shared docs
-	sources.Shared.TOC = Doc{
+	sources.Shared.TOC = &Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
@@ -79,19 +79,14 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		}}
 
 	//add versions
-	sources.Versions["9.0.0"] = Version{
+
+	//add versionNine docs
+	versionNine := Version{
 		Docs:    make(map[string]Doc),
 		Version: "9.0.0",
 	}
 
-	sources.Versions["10.0.0"] = Version{
-		Docs:    make(map[string]Doc),
-		Version: "10.0.0",
-	}
-
-	//add versionNine docs
-	versionNine := sources.Versions["9.0.0"]
-	versionNine.TOC = Doc{
+	versionNine.TOC = &Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
 		Version:    "9.0.0",
 		Storage: fakeDirEntry{
@@ -107,8 +102,14 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	versionTen := sources.Versions["10.0.0"]
-	versionTen.TOC = Doc{
+	sources.Versions["9.0.0"] = versionNine
+
+	versionTen := Version{
+		Docs:    make(map[string]Doc),
+		Version: "10.0.0",
+	}
+
+	versionTen.TOC = &Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{
@@ -131,6 +132,8 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			name:  "DocumentFour.md",
 			isDir: false,
 		}}
+
+	sources.Versions["10.0.0"] = versionTen
 
 	return sources
 }
