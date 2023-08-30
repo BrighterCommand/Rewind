@@ -2,6 +2,12 @@ package internal
 
 import "os"
 
+const gitBookFileName = ".gitbook.yaml"
+const tocFileName = ".toc.yaml"
+const shardFolderName = "shared"
+const summaryFolderName = "summary"
+const sharedVersion = "Shared"
+
 type Sources struct {
 	Root     *Root
 	Shared   *Shared
@@ -16,17 +22,17 @@ func NewSources() *Sources {
 	}
 }
 
-func (s *Sources) BuildBook(destPath string) (*Book, error) {
+func (s *Sources) BuildBook(destPath string, sourcePath string) (*Book, error) {
 
-	book := newBook(destPath)
+	book := newBook(destPath, sourcePath)
 
 	book.Root.GitBook = s.Root.GitBook
 
 	book.MakeVersions(s, destPath)
 
-	error := book.MakeTOC(s, destPath)
-	if error != nil {
-		return nil, error
+	err := book.MakeTOC(s)
+	if err != nil {
+		return nil, err
 	}
 
 	return book, nil
@@ -43,24 +49,21 @@ func (s *Sources) FindFromPath(root string) error {
 		return err
 	}
 
+	s.Root.SourcePath = root
+
 	for _, entry := range entries {
-		if entry.Name() == "SUMMARY.md" {
-			s.Root.Summary = &Doc{
-				SourcePath: root,
-				Storage:    entry,
-			}
-		} else if entry.Name() == ".gitbook.yaml" {
+		if entry.Name() == gitBookFileName {
 			s.Root.GitBook = &Doc{
 				SourcePath: root,
 				Storage:    entry,
 			}
-		} else if entry.IsDir() && entry.Name() == "shared" {
+		} else if entry.IsDir() && entry.Name() == shardFolderName {
 			shared, err := findShared(root, entry)
 			if err != nil {
 				return err
 			}
 			s.Shared = shared
-		} else if entry.IsDir() && entry.Name() != "summary" {
+		} else if entry.IsDir() && entry.Name() != summaryFolderName {
 			version, err := findVersion(root, entry)
 			if err != nil {
 				return err
@@ -85,7 +88,7 @@ func findVersionedDocs(path string, version *Version) (err error) {
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
-			if entry.Name() == ".toc.yaml" {
+			if entry.Name() == tocFileName {
 				version.TOC = &Doc{SourcePath: path, Version: version.Version, Storage: entry}
 			} else {
 				version.Docs[entry.Name()] = Doc{SourcePath: path, Version: version.Version, Storage: entry}
@@ -114,10 +117,10 @@ func findSharedDocs(path string, shared *Shared) (err error) {
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
-			if entry.Name() == ".toc.yaml" {
-				shared.TOC = &Doc{SourcePath: path, Version: "Shared", Storage: entry}
+			if entry.Name() == tocFileName {
+				shared.TOC = &Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
 			} else {
-				shared.Docs[entry.Name()] = Doc{SourcePath: path, Version: "Shared", Storage: entry}
+				shared.Docs[entry.Name()] = Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
 			}
 		} else {
 			err = findSharedDocs(path+"/"+entry.Name(), shared)

@@ -2,6 +2,8 @@ package internal
 
 import "os"
 
+const SummaryFileName = "SUMMARY.md"
+
 type Shared struct {
 	Docs map[string]Doc
 	TOC  *Doc
@@ -21,9 +23,10 @@ type Doc struct {
 }
 
 type Root struct {
-	DestPath string
-	Summary  *Doc
-	GitBook  *Doc
+	DestPath   string
+	SourcePath string
+	GitBook    *Doc
+	WorkDir    string
 }
 
 type TOCEntry struct {

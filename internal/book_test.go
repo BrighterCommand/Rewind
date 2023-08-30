@@ -51,8 +51,8 @@ func TestBookBuilder(t *testing.T) {
 	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
 	var sources = sourceTestDataBuilder(sourcePath, mydir)
-	var book, error = sources.BuildBook(destPath)
-	if error != nil {
+	book, err := sources.BuildBook(destPath, sourcePath)
+	if err != nil {
 		t.Errorf("Error building book: %s", err)
 	}
 
@@ -67,6 +67,12 @@ func TestBookBuilder(t *testing.T) {
 	checkVersion10(t, book, destPath, sourcePath)
 
 	checkTOC(t, book, sourcePath, destPath)
+
+	// Remove the temp directory used for the summary file
+	err = book.ClearWorkDir()
+	if err != nil {
+		t.Errorf("Error removing directory: %s", err)
+	}
 }
 
 func checkBookRoot(t *testing.T, book *Book, destPath string, sources *Sources, sourcePath string) {
@@ -197,32 +203,32 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 
 func checkTOC(t *testing.T, book *Book, sourcePath string, destPath string) {
 
-	if book.Root.Summary.Storage == nil || book.Root.Summary.Storage.Name() != "SUMMARY.md" {
-		t.Errorf("Expected a file for SUMMARY.md")
-	}
-
 	//In a book, the SUMMARY.md file is always copied to the destpath
 	if book.Root.DestPath != destPath {
-		t.Errorf("Expected %s, got %s", destPath, book.Root.Summary.SourcePath)
+		t.Errorf("Expected %s, got %s", destPath, book.Root.DestPath)
 	}
 
-	if book.Root.Summary.SourcePath != sourcePath+"/"+"summary" {
-		t.Errorf("Expected %s, got %s", sourcePath+"/"+"summary", book.Root.Summary.SourcePath)
+	if book.Root.SourcePath != sourcePath {
+		t.Errorf("Expected %s, got %s", sourcePath, book.Root.SourcePath)
 	}
 
-	mdFile, err := os.ReadFile(book.Root.Summary.SourcePath + "/" + book.Root.Summary.Storage.Name())
+	if book.Root.WorkDir == "" {
+		t.Errorf("Expected a WorkDir for the summary file")
+	}
+
+	mdFile, err := os.ReadFile(book.Root.WorkDir + "/" + SummaryFileName)
 	if err != nil {
 		t.Errorf("Error reading file: %s", err)
 	}
 
 	ext := parser.CommonExtensions | parser.OrderedListStart
-	parser := parser.NewWithExtensions(ext)
+	ps := parser.NewWithExtensions(ext)
 	renderer := md.NewRenderer()
-	doc := markdown.Parse(mdFile, parser)
+	doc := markdown.Parse(mdFile, ps)
 	got := markdown.Render(doc, renderer)
 	toc := fmt.Sprintf("%s", got)
 
-	if toc != "## v9.0.0\n### Brighter Configuration\n* [Document One](/v9.0.0/DocumentOne.md)\n* [Document Two](/v9.0.0/DocumentTwo.md)\n### Darker Configuration\n* [Document Three](/v9.0.0/DocumentThree.md)\n## v10.0.0\n### Brighter Configuration\n* [Document One](/v10.0.0/DocumentOne.md)\n* [Document Two](/v10.0.0/DocumentTwo.md)\n* [Document Four](/v10.0.0/DocumentFour.md)\n### Darker Configuration\n* [Document Three](/v10.0.0/DocumentThree.md)\n" {
+	if toc != "## 9.0.0\n### Brighter Configuration\n* [Document One](DocumentOne.md)\n    * [Document Two](DocumentTwo.md)\n### Darker Configuration\n* [Document Three](DocumentThree.md)\n## 10.0.0\n### Brighter Configuration\n* [Document One](DocumentOne.md)\n    * [Document Two](DocumentTwo.md)\n* [Document Four](DocumentFour.md)\n### Darker Configuration\n* [Document Three](DocumentThree.md)\n" {
 		t.Errorf("Expected empty string, got %s", toc)
 	}
 
@@ -244,7 +250,7 @@ func TestBookCreation(t *testing.T) {
 		t.Errorf("Error finding sources: %s", err)
 	}
 
-	book, err := sources.BuildBook(destPath)
+	book, err := sources.BuildBook(destPath, sourcePath)
 	if err != nil {
 		t.Errorf("Error building book: %s", err)
 	}

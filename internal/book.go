@@ -12,10 +12,11 @@ type Book struct {
 	Versions map[string]Version
 }
 
-func newBook(destPath string) *Book {
+func newBook(destPath string, sourcePath string) *Book {
 	return &Book{
 		Root: &Root{
-			DestPath: destPath,
+			DestPath:   destPath,
+			SourcePath: sourcePath,
 		},
 		Versions: make(map[string]Version),
 	}
@@ -33,7 +34,7 @@ func (b *Book) Publish() error {
 	}
 
 	//copy root files
-	err := copyFile(b.Root.Summary.SourcePath, b.Root.DestPath, b.Root.Summary.Storage.Name())
+	err := copyFile(b.Root.WorkDir, b.Root.DestPath, SummaryFileName)
 	if err != nil {
 		return err
 	}
@@ -62,6 +63,12 @@ func (b *Book) Publish() error {
 		}
 	}
 
+	//clean up the temporary files
+	err = b.ClearWorkDir()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -79,7 +86,7 @@ func (b *Book) MakeVersions(s *Sources, destPath string) {
 			bookVersion.Docs[key] = doc
 		}
 
-		//now copy assets for this version and overwrite any shared assets with the same name
+		//now copy assets for this sharedVersion and overwrite any shared assets with the same name
 		for key, doc := range version.Docs {
 			bookVersion.Docs[key] = doc
 		}
@@ -91,48 +98,65 @@ func (b *Book) MakeVersions(s *Sources, destPath string) {
 type toc map[string][]TOCEntry
 type versionedToc map[string]toc
 
-func (b *Book) MakeTOC(s *Sources, destPath string) error {
+func (b *Book) MakeTOC(s *Sources) error {
 
-	err := b.buildEntries(s)
+	entries, err := b.buildEntries(s)
 	if err != nil {
 		return err
 	}
 
+	//create a workdir
+	b.Root.WorkDir, err = os.MkdirTemp(s.Root.SourcePath, "summary")
+
+	//write the summary
+	summary, err := os.Create(b.Root.WorkDir + "/" + SummaryFileName)
+	if err != nil {
+		return err
+	}
+	defer summary.Close()
+
+	mg := newMarkdownGenerator()
+	err = mg.GenerateSummary(entries, summary)
+
 	return nil
 }
 
-func (b *Book) buildEntries(s *Sources) error {
+func (b *Book) ClearWorkDir() error {
+	return os.RemoveAll(b.Root.WorkDir)
+}
+
+func (b *Book) buildEntries(s *Sources) (*versionedToc, error) {
 	var summary = make(versionedToc)
 
 	shared, err := b.loadSharedEntries(s)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, version := range s.Versions {
 
 		configuration, err := b.buildVersionEntries(shared, version)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		summary[version.Version] = configuration
 	}
-	return nil
+	return &summary, nil
 }
 
 func (b *Book) loadSharedEntries(s *Sources) (toc, error) {
-	file, error := os.ReadFile(s.Shared.TOC.SourcePath + "/" + s.Shared.TOC.Storage.Name())
-	if error != nil {
-		log.Fatal(error)
-		return nil, error
+	file, err := os.ReadFile(s.Shared.TOC.SourcePath + "/" + s.Shared.TOC.Storage.Name())
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
 	}
 
 	shared := make(toc)
 
-	error = yaml.Unmarshal(file, &shared)
-	if error != nil {
-		log.Fatal(error)
-		return nil, error
+	err = yaml.Unmarshal(file, &shared)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
 	}
 	return shared, nil
 }
@@ -159,21 +183,21 @@ func (b *Book) addSharedEntries(shared toc, configuration toc) {
 
 func (b *Book) addVersionedEntries(version Version, configuration toc) (toc, error) {
 	//read the versioned information
-	file, error := os.ReadFile(version.TOC.SourcePath + "/" + version.TOC.Storage.Name())
-	if error != nil {
-		log.Fatal(error)
-		return nil, error
+	file, err := os.ReadFile(version.TOC.SourcePath + "/" + version.TOC.Storage.Name())
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
 	}
 
 	versioned := make(toc)
 
-	error = yaml.Unmarshal(file, &versioned)
-	if error != nil {
-		log.Fatal(error)
-		return nil, error
+	err = yaml.Unmarshal(file, &versioned)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
 	}
 
-	//for each toc in the version
+	//for each toc in the sharedVersion
 	for versionSection, versionTOC := range versioned {
 		//iterate over our shared toc entries
 		sectionExists := false
