@@ -7,7 +7,8 @@ import (
 )
 
 type markdownGenerator struct {
-	buffer *strings.Builder
+	destPath string
+	buffer   *strings.Builder
 }
 
 func newMarkdownGenerator() *markdownGenerator {
@@ -24,7 +25,7 @@ func (g *markdownGenerator) GenerateSummary(entries *versionedToc, summary *os.F
 		for section, entries := range toc {
 			g.WriteSection(section)
 			g.WriteLine()
-			g.WriteTOCs(entries)
+			g.WriteTOCs(entries, version)
 			g.WriteLine()
 		}
 	}
@@ -51,11 +52,18 @@ func (g *markdownGenerator) WriteSection(section string) {
 	g.buffer.WriteString("\n")
 }
 
-func (g *markdownGenerator) WriteTOCs(entries []TOCEntry) {
+func (g *markdownGenerator) WriteTOCs(entries []TOCEntry, version string) {
 	for _, entry := range entries {
-		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, entry.File, entry.Indent))
+		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, g.getLinkPath(entry, version), entry.Indent))
 		g.buffer.WriteString("\n")
 	}
+}
+
+func (g *markdownGenerator) getLinkPath(entry TOCEntry, version string) string {
+	link := "/" + ContentDirName + "/" + version + "/" + entry.File
+	//spaces in markdown links may cause issues, so replace them with %20
+	nospace := strings.ReplaceAll(link, " ", "%20")
+	return nospace
 }
 
 func (m *markdownGenerator) getLink(desc, url string) string {

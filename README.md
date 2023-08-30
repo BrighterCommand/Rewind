@@ -28,15 +28,19 @@ version we may change this so that we include V1 within V2, but for now, we are 
 
 ## Table of Contents
 
-The table of contents lives in the SUMMARY.md file. To build it, we use the .toc.yaml files that we locate in the root
-of any document collection. The .toc.yaml file is a list of files that we want to include in the table of contents. 
+For GitBook we build a [SUMMARY.md](https://docs.gitbook.com/product-tour/git-sync/content-configuration) file.
 
-Files are grouped by heading. This appears in the subsequent markdown file as a level 2 heading.
+To build the SUMMARY.md file we use .toc.yaml files that we locate in the root of any document collection. 
+The .toc.yaml file is a list of files that we want to include in the table of contents. 
 
-Under each heading is a collection of files.
+Files are grouped by heading (for example Brighter Configuration, Brighter Request Handlers and Middleware Pipelines). 
+This appears in the subsequent markdown file as a level 2 heading.
 
-For each file you need to record the filename, the title and the indent. The indent is how deeply indented you want the 
-file's entry to be in the table of contents. The indent is optional and defaults to 1.
+Under each heading is a collection of links to the pages in that section of the table of contents.
+
+To create this in our .toc.yaml file we create a map for each configuration section. The key is the heading and the value. 
+For each link you need to supply: filename, title and indent. The indent is how deeply indented you want the 
+file's entry to be in the table of contents. The indent is optional and defaults to 1. This allows you to nest pages.
 
 Assuming the following .toc.yaml file was located in the root of a v9.0.0 folder
 
@@ -47,12 +51,19 @@ Brighter Configuration:
   indent: 1
 ```
 
-will yield
+this will yield the following in the SUMMARY.md file
 
 ```markdown
 ## Brighter Configuration
 * [Getting Started](/v9.0.0/GettingStarted.md)
 ```
+
+### Anchor Links
+
+We don't support Anchor Links for page links within the TOC in this version. This is because whilst GitBook displays them 
+it does not allow them to be navigated. GitBook does show an outline control that indicates the sub-headings. For this
+reason, you should just document whole pages in the TOC.
+
 
 
 

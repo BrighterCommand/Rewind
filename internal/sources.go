@@ -28,7 +28,7 @@ func (s *Sources) BuildBook(destPath string, sourcePath string) (*Book, error) {
 
 	book.Root.GitBook = s.Root.GitBook
 
-	book.MakeVersions(s, destPath)
+	book.MakeVersions(s)
 
 	err := book.MakeTOC(s)
 	if err != nil {

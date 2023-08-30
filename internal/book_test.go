@@ -40,6 +40,7 @@ func TestFileCopy(t *testing.T) {
 
 // TestBookBuilder tests the book builder.
 // It creates a fake directory structure and then runs the book builder.
+// NOTE: Test can fail because ordering is not guaranteed in maps. A re-run typically fixes the issue.
 func TestBookBuilder(t *testing.T) {
 
 	mydir, err := os.Getwd()
@@ -102,8 +103,8 @@ func checkVersion9(t *testing.T, book *Book, destPath string, sourcePath string)
 		t.Errorf("Expected 9.0.0, got %s", book.Versions["9.0.0"].Version)
 	}
 
-	if versionNine.DestPath != fmt.Sprintf("%s/9.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/9.0.0", destPath), versionNine.DestPath)
+	if versionNine.DestPath != fmt.Sprintf("%s/contents/9.0.0", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/contents/9.0.0", destPath), versionNine.DestPath)
 	}
 
 	if len(versionNine.Docs) != 3 {
@@ -151,8 +152,8 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 		t.Errorf("Expected 10.0.0, got %s", book.Versions["10.0.0"].Version)
 	}
 
-	if versionTen.DestPath != fmt.Sprintf("%s/10.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/10.0.0", destPath), versionTen.DestPath)
+	if versionTen.DestPath != fmt.Sprintf("%s/contents/10.0.0", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/contents/10.0.0", destPath), versionTen.DestPath)
 	}
 
 	if len(versionTen.Docs) != 4 {
@@ -228,8 +229,9 @@ func checkTOC(t *testing.T, book *Book, sourcePath string, destPath string) {
 	got := markdown.Render(doc, renderer)
 	toc := fmt.Sprintf("%s", got)
 
-	if toc != "## 9.0.0\n### Brighter Configuration\n* [Document One](DocumentOne.md)\n    * [Document Two](DocumentTwo.md)\n### Darker Configuration\n* [Document Three](DocumentThree.md)\n## 10.0.0\n### Brighter Configuration\n* [Document One](DocumentOne.md)\n    * [Document Two](DocumentTwo.md)\n* [Document Four](DocumentFour.md)\n### Darker Configuration\n* [Document Three](DocumentThree.md)\n" {
-		t.Errorf("Expected empty string, got %s", toc)
+	expectedTOC := "## 9.0.0\n### Brighter Configuration\n* [Document One](/contents/9.0.0/DocumentOne.md)\n    * [Document Two](/contents/9.0.0/DocumentTwo.md)\n### Darker Configuration\n* [Document Three](/contents/9.0.0/DocumentThree.md)\n## 10.0.0\n### Brighter Configuration\n* [Document One](/contents/10.0.0/DocumentOne.md)\n    * [Document Two](/contents/10.0.0/DocumentTwo.md)\n* [Document Four](/contents/10.0.0/DocumentFour.md)\n### Darker Configuration\n* [Document Three](/contents/10.0.0/DocumentThree.md)\n"
+	if toc != expectedTOC {
+		t.Errorf("Expected %s, got %s", expectedTOC, toc)
 	}
 
 }
@@ -272,21 +274,29 @@ func TestBookCreation(t *testing.T) {
 		} else if entry.Name() == ".gitbook.yaml" {
 			gitbookFound = true
 		} else if entry.IsDir() {
-			if entry.Name() == "9.0.0" {
-				v9entries, err := os.ReadDir(fmt.Sprintf("%s/9.0.0", destPath))
+			if entry.Name() == "contents" {
+				contents, err := os.ReadDir(destPath + "/contents")
 				if err != nil {
 					t.Errorf("Error reading directory: %s", err)
-					v9Found = false
-				} else {
-					v9Found = findFiles(v9entries)
 				}
-			} else if entry.Name() == "10.0.0" {
-				v10entries, err := os.ReadDir(fmt.Sprintf("%s/10.0.0", destPath))
-				if err != nil {
-					t.Errorf("Error reading directory: %s", err)
-					v10Found = false
-				} else {
-					v10Found = findFiles(v10entries)
+				for _, entry := range contents {
+					if entry.Name() == "9.0.0" {
+						v9entries, err := os.ReadDir(fmt.Sprintf("%s/contents/9.0.0", destPath))
+						if err != nil {
+							t.Errorf("Error reading directory: %s", err)
+							v9Found = false
+						} else {
+							v9Found = findFiles(v9entries)
+						}
+					} else if entry.Name() == "10.0.0" {
+						v10entries, err := os.ReadDir(fmt.Sprintf("%s/contents/10.0.0", destPath))
+						if err != nil {
+							t.Errorf("Error reading directory: %s", err)
+							v10Found = false
+						} else {
+							v10Found = findFiles(v10entries)
+						}
+					}
 				}
 			}
 		}

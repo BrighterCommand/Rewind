@@ -72,12 +72,12 @@ func (b *Book) Publish() error {
 	return nil
 }
 
-func (b *Book) MakeVersions(s *Sources, destPath string) {
+func (b *Book) MakeVersions(s *Sources) {
 	for key, version := range s.Versions {
 
 		var bookVersion = &Version{
 			Version:  version.Version,
-			DestPath: destPath + "/" + version.Version,
+			DestPath: b.Root.DestPath + "/" + ContentDirName + "/" + version.Version,
 			Docs:     make(map[string]Doc),
 		}
 

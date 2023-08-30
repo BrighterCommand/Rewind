@@ -3,6 +3,7 @@ package internal
 import "os"
 
 const SummaryFileName = "SUMMARY.md"
+const ContentDirName = "contents"
 
 type Shared struct {
 	Docs map[string]Doc
