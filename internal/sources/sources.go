@@ -1,6 +1,9 @@
-package internal
+package sources
 
-import "os"
+import (
+	"github.com/brightercommand/Rewind/internal/pages"
+	"os"
+)
 
 const gitBookFileName = ".gitbook.yaml"
 const tocFileName = ".toc.yaml"
@@ -9,33 +12,17 @@ const summaryFolderName = "summary"
 const sharedVersion = "Shared"
 
 type Sources struct {
-	Root     *Root
-	Shared   *Shared
-	Versions map[string]Version
+	Root     *pages.Root
+	Shared   *pages.Shared
+	Versions map[string]pages.Version
 }
 
 func NewSources() *Sources {
 	return &Sources{
-		Root:     &Root{},
-		Shared:   &Shared{},
-		Versions: make(map[string]Version),
+		Root:     &pages.Root{},
+		Shared:   &pages.Shared{},
+		Versions: make(map[string]pages.Version),
 	}
-}
-
-func (s *Sources) BuildBook(destPath string, sourcePath string) (*Book, error) {
-
-	book := newBook(destPath, sourcePath)
-
-	book.Root.GitBook = s.Root.GitBook
-
-	book.MakeVersions(s)
-
-	err := book.MakeTOC(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return book, nil
 }
 
 // FindFromPath finds the sources for a book.
@@ -53,7 +40,7 @@ func (s *Sources) FindFromPath(root string) error {
 
 	for _, entry := range entries {
 		if entry.Name() == gitBookFileName {
-			s.Root.GitBook = &Doc{
+			s.Root.GitBook = &pages.Doc{
 				SourcePath: root,
 				Storage:    entry,
 			}
@@ -79,7 +66,7 @@ func (s *Sources) FindFromPath(root string) error {
 // It takes a directory entry and an Version struct.
 // It returns an error.
 // It will recurse over any subdirectories and place all shared assets at the same level.
-func findVersionedDocs(path string, version *Version) (err error) {
+func findVersionedDocs(path string, version *pages.Version) (err error) {
 
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -89,9 +76,9 @@ func findVersionedDocs(path string, version *Version) (err error) {
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			if entry.Name() == tocFileName {
-				version.TOC = &Doc{SourcePath: path, Version: version.Version, Storage: entry}
+				version.TOC = &pages.Doc{SourcePath: path, Version: version.Version, Storage: entry}
 			} else {
-				version.Docs[entry.Name()] = Doc{SourcePath: path, Version: version.Version, Storage: entry}
+				version.Docs[entry.Name()] = pages.Doc{SourcePath: path, Version: version.Version, Storage: entry}
 			}
 		} else {
 			err = findVersionedDocs(path+"/"+entry.Name(), version)
@@ -108,7 +95,7 @@ func findVersionedDocs(path string, version *Version) (err error) {
 // It takes a directory entry and a Shared struct.
 // It returns an error.
 // It will recurse over any subdirectories and place all shared assets at the same level.
-func findSharedDocs(path string, shared *Shared) (err error) {
+func findSharedDocs(path string, shared *pages.Shared) (err error) {
 
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -118,9 +105,9 @@ func findSharedDocs(path string, shared *Shared) (err error) {
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			if entry.Name() == tocFileName {
-				shared.TOC = &Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
+				shared.TOC = &pages.Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
 			} else {
-				shared.Docs[entry.Name()] = Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
+				shared.Docs[entry.Name()] = pages.Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
 			}
 		} else {
 			err = findSharedDocs(path+"/"+entry.Name(), shared)
@@ -136,9 +123,9 @@ func findSharedDocs(path string, shared *Shared) (err error) {
 // findShared finds the shared documents for the book.
 // It takes a directory entry and its path.
 // It returns a Shared struct.
-func findShared(path string, entry os.DirEntry) (shared *Shared, err error) {
-	shared = &Shared{
-		Docs: make(map[string]Doc),
+func findShared(path string, entry os.DirEntry) (shared *pages.Shared, err error) {
+	shared = &pages.Shared{
+		Docs: make(map[string]pages.Doc),
 	}
 
 	sharedPath := path + "/" + entry.Name()
@@ -155,10 +142,10 @@ func findShared(path string, entry os.DirEntry) (shared *Shared, err error) {
 // findVersion finds the versioned documents for the book.
 // It takes a directory entry and its path.
 // It returns a Version struct.
-func findVersion(path string, entry os.DirEntry) (version *Version, err error) {
+func findVersion(path string, entry os.DirEntry) (version *pages.Version, err error) {
 
-	version = &Version{
-		Docs:    make(map[string]Doc),
+	version = &pages.Version{
+		Docs:    make(map[string]pages.Doc),
 		Version: entry.Name(),
 	}
 

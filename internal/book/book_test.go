@@ -1,7 +1,9 @@
-package internal
+package book
 
 import (
 	"fmt"
+	"github.com/brightercommand/Rewind/internal/pages"
+	"github.com/brightercommand/Rewind/internal/sources"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/md"
 	"github.com/gomarkdown/markdown/parser"
@@ -17,8 +19,8 @@ func TestFileCopy(t *testing.T) {
 		t.Errorf("Error getting working directory: %s", err)
 	}
 
-	sourcePath := strings.Replace(mydir, "internal", "test/filecopy", 1)
-	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/filecopy/%s", uuid.New().String()), 1)
+	sourcePath := strings.Replace(mydir, "internal/book", "test/filecopy", 1)
+	destPath := strings.Replace(mydir, "internal/book", fmt.Sprintf("test/filecopy/%s", uuid.New().String()), 1)
 
 	err = copyFile(sourcePath, destPath, "DocumentOne.md")
 	if err != nil {
@@ -51,13 +53,13 @@ func TestBookBuilder(t *testing.T) {
 	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
 	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
-	var sources = sourceTestDataBuilder(sourcePath, mydir)
-	book, err := sources.BuildBook(destPath, sourcePath)
+	var src = sources.SourceTestDataBuilder(sourcePath, mydir)
+	book, err := MakeBook(src, destPath)
 	if err != nil {
 		t.Errorf("Error building book: %s", err)
 	}
 
-	checkBookRoot(t, book, destPath, sources, sourcePath)
+	checkBookRoot(t, book, destPath, src, sourcePath)
 
 	if len(book.Versions) != 2 {
 		t.Errorf("Expected 2 versions, got %d", len(book.Versions))
@@ -76,7 +78,7 @@ func TestBookBuilder(t *testing.T) {
 	}
 }
 
-func checkBookRoot(t *testing.T, book *Book, destPath string, sources *Sources, sourcePath string) {
+func checkBookRoot(t *testing.T, book *Book, destPath string, sources *sources.Sources, sourcePath string) {
 	if book.Root.DestPath != destPath {
 		t.Errorf("Expected %s but found %s", destPath, book.Root.DestPath)
 	}
@@ -217,7 +219,7 @@ func checkTOC(t *testing.T, book *Book, sourcePath string, destPath string) {
 		t.Errorf("Expected a WorkDir for the summary file")
 	}
 
-	mdFile, err := os.ReadFile(book.Root.WorkDir + "/" + SummaryFileName)
+	mdFile, err := os.ReadFile(book.Root.WorkDir + "/" + pages.SummaryFileName)
 	if err != nil {
 		t.Errorf("Error reading file: %s", err)
 	}
@@ -246,13 +248,13 @@ func TestBookCreation(t *testing.T) {
 	sourcePath := strings.Replace(myDir, "internal", "test/source", 1)
 	destPath := strings.Replace(myDir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
-	sources := NewSources()
-	err = sources.FindFromPath(sourcePath)
+	src := sources.NewSources()
+	err = src.FindFromPath(sourcePath)
 	if err != nil {
 		t.Errorf("Error finding sources: %s", err)
 	}
 
-	book, err := sources.BuildBook(destPath, sourcePath)
+	book, err := MakeBook(src, destPath)
 	if err != nil {
 		t.Errorf("Error building book: %s", err)
 	}
@@ -271,7 +273,7 @@ func TestBookCreation(t *testing.T) {
 	for _, entry := range entries {
 		if entry.Name() == "SUMMARY.md" {
 			summaryFound = true
-		} else if entry.Name() == ".gitbook.yaml" {
+		} else if entry.Name() == "..gitbook.yaml" {
 			gitbookFound = true
 		} else if entry.IsDir() {
 			if entry.Name() == "contents" {
@@ -307,7 +309,7 @@ func TestBookCreation(t *testing.T) {
 	}
 
 	if gitbookFound == false {
-		t.Errorf("Expected .gitbook.yaml")
+		t.Errorf("Expected ..gitbook.yaml")
 	}
 
 	if v9Found == false {

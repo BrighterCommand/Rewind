@@ -1,6 +1,8 @@
-package internal
+package book
 
 import (
+	"github.com/brightercommand/Rewind/internal/pages"
+	"github.com/brightercommand/Rewind/internal/sources"
 	"gopkg.in/yaml.v3"
 	"io"
 	"log"
@@ -8,18 +10,28 @@ import (
 )
 
 type Book struct {
-	Root     *Root
-	Versions map[string]Version
+	Root     *pages.Root
+	Versions map[string]pages.Version
 }
 
-func newBook(destPath string, sourcePath string) *Book {
-	return &Book{
-		Root: &Root{
+func MakeBook(s *sources.Sources, destPath string) (*Book, error) {
+	b := &Book{
+		Root: &pages.Root{
 			DestPath:   destPath,
-			SourcePath: sourcePath,
+			SourcePath: s.Root.SourcePath,
+			GitBook:    s.Root.GitBook,
 		},
-		Versions: make(map[string]Version),
+		Versions: make(map[string]pages.Version),
 	}
+
+	b.MakeVersions(s)
+
+	err := b.MakeTOC(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
 
 func (b *Book) Publish() error {
@@ -34,7 +46,7 @@ func (b *Book) Publish() error {
 	}
 
 	//copy root files
-	err := copyFile(b.Root.WorkDir, b.Root.DestPath, SummaryFileName)
+	err := copyFile(b.Root.WorkDir, b.Root.DestPath, pages.SummaryFileName)
 	if err != nil {
 		return err
 	}
@@ -72,13 +84,13 @@ func (b *Book) Publish() error {
 	return nil
 }
 
-func (b *Book) MakeVersions(s *Sources) {
+func (b *Book) MakeVersions(s *sources.Sources) {
 	for key, version := range s.Versions {
 
-		var bookVersion = &Version{
+		var bookVersion = &pages.Version{
 			Version:  version.Version,
-			DestPath: b.Root.DestPath + "/" + ContentDirName + "/" + version.Version,
-			Docs:     make(map[string]Doc),
+			DestPath: b.Root.DestPath + "/" + pages.ContentDirName + "/" + version.Version,
+			Docs:     make(map[string]pages.Doc),
 		}
 
 		//copy shared assets first
@@ -95,10 +107,10 @@ func (b *Book) MakeVersions(s *Sources) {
 	}
 }
 
-type toc map[string][]TOCEntry
+type toc map[string][]pages.TOCEntry
 type versionedToc map[string]toc
 
-func (b *Book) MakeTOC(s *Sources) error {
+func (b *Book) MakeTOC(s *sources.Sources) error {
 
 	entries, err := b.buildEntries(s)
 	if err != nil {
@@ -109,7 +121,7 @@ func (b *Book) MakeTOC(s *Sources) error {
 	b.Root.WorkDir, err = os.MkdirTemp(s.Root.SourcePath, "summary")
 
 	//write the summary
-	summary, err := os.Create(b.Root.WorkDir + "/" + SummaryFileName)
+	summary, err := os.Create(b.Root.WorkDir + "/" + pages.SummaryFileName)
 	if err != nil {
 		return err
 	}
@@ -125,7 +137,7 @@ func (b *Book) ClearWorkDir() error {
 	return os.RemoveAll(b.Root.WorkDir)
 }
 
-func (b *Book) buildEntries(s *Sources) (*versionedToc, error) {
+func (b *Book) buildEntries(s *sources.Sources) (*versionedToc, error) {
 	var summary = make(versionedToc)
 
 	shared, err := b.loadSharedEntries(s)
@@ -144,7 +156,7 @@ func (b *Book) buildEntries(s *Sources) (*versionedToc, error) {
 	return &summary, nil
 }
 
-func (b *Book) loadSharedEntries(s *Sources) (toc, error) {
+func (b *Book) loadSharedEntries(s *sources.Sources) (toc, error) {
 	file, err := os.ReadFile(s.Shared.TOC.SourcePath + "/" + s.Shared.TOC.Storage.Name())
 	if err != nil {
 		log.Fatal(err)
@@ -161,7 +173,7 @@ func (b *Book) loadSharedEntries(s *Sources) (toc, error) {
 	return shared, nil
 }
 
-func (b *Book) buildVersionEntries(shared toc, version Version) (toc, error) {
+func (b *Book) buildVersionEntries(shared toc, version pages.Version) (toc, error) {
 	//merge the shared and versioned information
 	configuration := make(toc)
 
@@ -181,7 +193,7 @@ func (b *Book) addSharedEntries(shared toc, configuration toc) {
 	}
 }
 
-func (b *Book) addVersionedEntries(version Version, configuration toc) (toc, error) {
+func (b *Book) addVersionedEntries(version pages.Version, configuration toc) (toc, error) {
 	//read the versioned information
 	file, err := os.ReadFile(version.TOC.SourcePath + "/" + version.TOC.Storage.Name())
 	if err != nil {
@@ -205,7 +217,7 @@ func (b *Book) addVersionedEntries(version Version, configuration toc) (toc, err
 			if versionSection == sharedSection {
 				sectionExists = true
 				//we already have this section and map values need to be re-assigned not changed
-				var entries = make([]TOCEntry, 0)
+				var entries = make([]pages.TOCEntry, 0)
 				//add the shared entries
 				for _, sharedEntry := range sharedTOC {
 					entries = append(entries, sharedEntry)

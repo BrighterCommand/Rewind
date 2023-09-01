@@ -58,6 +58,10 @@ this will yield the following in the SUMMARY.md file
 * [Getting Started](/v9.0.0/GettingStarted.md)
 ```
 
+### Ordering
+
+NOTE: WE NEED TO THINK ABOUT HOW WE WOULD ORDER ENTRIES. THIS MAY ALSO SOLVE THE ERRATIC TEST PROBLEM!!
+
 ### Anchor Links
 
 We don't support Anchor Links for page links within the TOC in this version. This is because whilst GitBook displays them 

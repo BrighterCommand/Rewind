@@ -1,6 +1,7 @@
-package internal
+package sources
 
 import (
+	"github.com/brightercommand/Rewind/internal/pages"
 	"os"
 	"strings"
 )
@@ -28,25 +29,25 @@ func (f fakeDirEntry) Info() (os.FileInfo, error) {
 	return nil, nil
 }
 
-func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
+func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	sources := &Sources{
-		Root: &Root{
-			GitBook: &Doc{
+		Root: &pages.Root{
+			GitBook: &pages.Doc{
 				SourcePath: sourcePath,
 				Storage: fakeDirEntry{
-					name:  ".gitbook.yaml",
+					name:  "..gitbook.yaml",
 					isDir: false,
 				},
 			},
 		},
-		Shared: &Shared{
-			Docs: make(map[string]Doc),
+		Shared: &pages.Shared{
+			Docs: make(map[string]pages.Doc),
 		},
-		Versions: make(map[string]Version),
+		Versions: make(map[string]pages.Version),
 	}
 
 	//add shared docs
-	sources.Shared.TOC = &Doc{
+	sources.Shared.TOC = &pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
@@ -54,7 +55,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	sources.Shared.Docs["DocumentOne.md"] = Doc{
+	sources.Shared.Docs["DocumentOne.md"] = pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
@@ -62,7 +63,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	sources.Shared.Docs["DocumentTwo.md"] = Doc{
+	sources.Shared.Docs["DocumentTwo.md"] = pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
@@ -70,7 +71,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	sources.Shared.Docs["DocumentThree.md"] = Doc{
+	sources.Shared.Docs["DocumentThree.md"] = pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
@@ -81,12 +82,12 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	//add versions
 
 	//add versionNine docs
-	versionNine := Version{
-		Docs:    make(map[string]Doc),
+	versionNine := pages.Version{
+		Docs:    make(map[string]pages.Doc),
 		Version: "9.0.0",
 	}
 
-	versionNine.TOC = &Doc{
+	versionNine.TOC = &pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
 		Version:    "9.0.0",
 		Storage: fakeDirEntry{
@@ -94,7 +95,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	versionNine.Docs["DocumentTwo.md"] = Doc{
+	versionNine.Docs["DocumentTwo.md"] = pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
 		Version:    "9.0.0",
 		Storage: fakeDirEntry{
@@ -104,12 +105,12 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 
 	sources.Versions["9.0.0"] = versionNine
 
-	versionTen := Version{
-		Docs:    make(map[string]Doc),
+	versionTen := pages.Version{
+		Docs:    make(map[string]pages.Doc),
 		Version: "10.0.0",
 	}
 
-	versionTen.TOC = &Doc{
+	versionTen.TOC = &pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{
@@ -117,7 +118,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	versionTen.Docs["DocumentOne.md"] = Doc{
+	versionTen.Docs["DocumentOne.md"] = pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{
@@ -125,7 +126,7 @@ func sourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
-	versionTen.Docs["DocumentFour.md"] = Doc{
+	versionTen.Docs["DocumentFour.md"] = pages.Doc{
 		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{

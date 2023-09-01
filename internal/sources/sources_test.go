@@ -1,4 +1,4 @@
-package internal
+package sources
 
 import (
 	"os"
@@ -13,7 +13,7 @@ func TestFindSources(t *testing.T) {
 		t.Errorf("Error getting working directory: %s", err)
 	}
 
-	sourcePath := strings.Replace(myDir, "internal", "test/source", 1)
+	sourcePath := strings.Replace(myDir, "internal/sources", "test/source", 1)
 
 	sources := NewSources()
 	err = sources.FindFromPath(sourcePath)

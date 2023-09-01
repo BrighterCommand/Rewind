@@ -1,7 +1,8 @@
-package internal
+package book
 
 import (
 	"fmt"
+	"github.com/brightercommand/Rewind/internal/pages"
 	"os"
 	"strings"
 )
@@ -52,15 +53,15 @@ func (g *markdownGenerator) WriteSection(section string) {
 	g.buffer.WriteString("\n")
 }
 
-func (g *markdownGenerator) WriteTOCs(entries []TOCEntry, version string) {
+func (g *markdownGenerator) WriteTOCs(entries []pages.TOCEntry, version string) {
 	for _, entry := range entries {
 		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, g.getLinkPath(entry, version), entry.Indent))
 		g.buffer.WriteString("\n")
 	}
 }
 
-func (g *markdownGenerator) getLinkPath(entry TOCEntry, version string) string {
-	link := "/" + ContentDirName + "/" + version + "/" + entry.File
+func (g *markdownGenerator) getLinkPath(entry pages.TOCEntry, version string) string {
+	link := "/" + pages.ContentDirName + "/" + version + "/" + entry.File
 	//spaces in markdown links may cause issues, so replace them with %20
 	nospace := strings.ReplaceAll(link, " ", "%20")
 	return nospace

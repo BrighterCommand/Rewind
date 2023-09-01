@@ -1,6 +1,7 @@
-package internal
+package book
 
 import (
+	"github.com/brightercommand/Rewind/internal/pages"
 	"strings"
 	"testing"
 )
@@ -11,7 +12,7 @@ func TestMarkdownGenerator(t *testing.T) {
 	generator.WriteLine()
 	generator.WriteSection("BrighterConfiguration")
 	generator.WriteLine()
-	generator.WriteTOCs([]TOCEntry{
+	generator.WriteTOCs([]pages.TOCEntry{
 		{
 			Name:   "DocumentOne",
 			File:   "DocumentOne.md",
@@ -27,7 +28,7 @@ func TestMarkdownGenerator(t *testing.T) {
 	generator.WriteLine()
 	generator.WriteSection("DarkerConfiguration")
 	generator.WriteLine()
-	generator.WriteTOCs([]TOCEntry{
+	generator.WriteTOCs([]pages.TOCEntry{
 		{
 			Name:   "DocumentThree",
 			File:   "DocumentThree.md",
