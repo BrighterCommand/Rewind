@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(reverseCmd)
+	rootCmd.AddCommand(makeBookCmd)
 }
 
 func Execute() {

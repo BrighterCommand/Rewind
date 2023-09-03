@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-var reverseCmd = &cobra.Command{
+var makeBookCmd = &cobra.Command{
 	Use:     "makebook",
 	Aliases: []string{"make"},
 	Short:   "Turns versioned markdown files into a gitbook director",
