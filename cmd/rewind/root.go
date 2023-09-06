@@ -14,8 +14,6 @@ var rootCmd = &cobra.Command{
 			folder should be your destination folder. The source folder should also be a root level folder
 			which contains a shared folder for common markdown pages, and version folders for versioned documents.
 			A toc file in shared and version is used to supply information on how to build the toc.`,
-	Run: func(cmd *cobra.Command, args []string) {
-	},
 }
 
 func init() {

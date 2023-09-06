@@ -34,6 +34,10 @@ func checkRoot(t *testing.T, sources *Sources) {
 	if root.GitBook.Storage.Name() != ".gitbook.yaml" {
 		t.Errorf("Expected .gitbook.yaml")
 	}
+
+	if root.ReadMe.Storage.Name() != "README.md" {
+		t.Errorf("Expected README.md")
+	}
 }
 
 func checkShared(t *testing.T, sources *Sources) {
@@ -65,6 +69,21 @@ func checkShared(t *testing.T, sources *Sources) {
 			t.Errorf("Expected DocumentThree.md, got %s", docs["DocumentThree.md"])
 		}
 	}
+
+	images := sources.Shared.Images
+
+	if len(images) != 2 {
+		t.Errorf("Expected 1 image, got %d", len(images))
+	} else {
+		if images["ImageOne.png"].Storage.Name() != "ImageOne.png" {
+			t.Errorf("Expected ImageOne.png, got %s", images["ImageOne.png"].Storage.Name())
+		}
+
+		if images["ImageTwo.png"].Storage.Name() != "ImageTwo.png" {
+			t.Errorf("Expected ImageTwo.png, got %s", images["ImageTwo.png"].Storage.Name())
+		}
+	}
+
 	return
 }
 
@@ -85,7 +104,7 @@ func checkVersions(t *testing.T, sources *Sources) {
 
 			docs := version.Docs
 			if len(docs) != 2 {
-				t.Errorf("Expected 3 documents, got %d", len(docs))
+				t.Errorf("Expected 2 documents, got %d", len(docs))
 			} else {
 
 				if docs["DocumentOne.md"].Storage.Name() != "DocumentOne.md" {
@@ -94,6 +113,19 @@ func checkVersions(t *testing.T, sources *Sources) {
 
 				if docs["DocumentFour.md"].Storage.Name() != "DocumentFour.md" {
 					t.Errorf("Expected DocumentFour.md, got %s", docs["DocumentFour.md"])
+				}
+			}
+
+			images := version.Images
+			if len(images) != 2 {
+				t.Errorf("Expected 2 image, got %d", len(images))
+			} else {
+				if images["ImageOne.png"].Storage.Name() != "ImageOne.png" {
+					t.Errorf("Expected ImageOne.png, got %s", images["ImageOne.png"].Storage.Name())
+				}
+
+				if images["ImageThree.png"].Storage.Name() != "ImageThree.png" {
+					t.Errorf("Expected ImageThree.png, got %s", images["ImageThree.png"].Storage.Name())
 				}
 			}
 		}
@@ -108,11 +140,24 @@ func checkVersions(t *testing.T, sources *Sources) {
 
 			docs := version.Docs
 			if len(docs) != 1 {
-				t.Errorf("Expected 2 documents, got %d", len(docs))
+				t.Errorf("Expected 1 document, got %d", len(docs))
 			} else {
 
 				if docs["DocumentTwo.md"].Storage.Name() != "DocumentTwo.md" {
 					t.Errorf("Expected DocumentTwo.md, got %s", docs["DocumentTwo.md"])
+				}
+			}
+
+			images := version.Images
+			if len(images) != 2 {
+				t.Errorf("Expected 2 images, got %d", len(images))
+			} else {
+				if images["ImageThree.png"].Storage.Name() != "ImageThree.png" {
+					t.Errorf("Expected ImageThree.png, got %s", images["ImageThree.png"].Storage.Name())
+				}
+
+				if images["ImageFour.png"].Storage.Name() != "ImageFour.png" {
+					t.Errorf("Expected ImageFour.png, got %s", images["ImageFour.png"].Storage.Name())
 				}
 			}
 		}

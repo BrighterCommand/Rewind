@@ -10,8 +10,8 @@ import (
 var makeBookCmd = &cobra.Command{
 	Use:     "makebook",
 	Aliases: []string{"make"},
-	Short:   "Turns versioned markdown files into a gitbook director",
-	Long: `Turns versioned markdown files into a gitbook directory.
+	Short:   "Turns versioned markdown files into a gitbook",
+	Long: `Turns versioned markdown files into a gitbook.
 			Expects a source path with a pointer to a director with the following structure:
 			- source
                 - shared //common docs

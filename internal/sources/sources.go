@@ -3,6 +3,7 @@ package sources
 import (
 	"github.com/brightercommand/Rewind/internal/pages"
 	"os"
+	"strings"
 )
 
 const gitBookFileName = ".gitbook.yaml"
@@ -44,6 +45,11 @@ func (s *Sources) FindFromPath(root string) error {
 				SourcePath: root,
 				Storage:    entry,
 			}
+		} else if entry.Name() == "README.md" {
+			s.Root.ReadMe = &pages.Doc{
+				SourcePath: root,
+				Storage:    entry,
+			}
 		} else if entry.IsDir() && entry.Name() == shardFolderName {
 			shared, err := findShared(root, entry)
 			if err != nil {
@@ -65,7 +71,8 @@ func (s *Sources) FindFromPath(root string) error {
 // findVersionedDocs finds the versioned documents for the book.
 // It takes a directory entry and an Version struct.
 // It returns an error.
-// It will recurse over any subdirectories and place all shared assets at the same level.
+// We assume that all documents are in the root of the version folder.
+// We assume that sub-folders are used for images.
 func findVersionedDocs(path string, version *pages.Version) (err error) {
 
 	entries, err := os.ReadDir(path)
@@ -77,11 +84,11 @@ func findVersionedDocs(path string, version *pages.Version) (err error) {
 		if !entry.IsDir() {
 			if entry.Name() == tocFileName {
 				version.TOC = &pages.Doc{SourcePath: path, Version: version.Version, Storage: entry}
-			} else {
+			} else if strings.HasSuffix(entry.Name(), ".md") {
 				version.Docs[entry.Name()] = pages.Doc{SourcePath: path, Version: version.Version, Storage: entry}
 			}
-		} else {
-			err = findVersionedDocs(path+"/"+entry.Name(), version)
+		} else if entry.Name() == pages.StaticFolderName {
+			err = findVersionedImages(path+"/"+entry.Name(), version)
 			if err != nil {
 				return err
 			}
@@ -91,10 +98,35 @@ func findVersionedDocs(path string, version *pages.Version) (err error) {
 	return nil
 }
 
+func findVersionedImages(path string, version *pages.Version) error {
+
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			if isImageFile(entry.Name()) {
+				version.Images[entry.Name()] = pages.Asset{SourcePath: path, What: pages.Image, Version: version.Version, Storage: entry}
+			}
+		} else if entry.Name() == pages.ImageFolderName {
+			err = findVersionedImages(path+"/"+entry.Name(), version)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
 // findSharedDocs finds the documents for the book.
 // It takes a directory entry and a Shared struct.
 // It returns an error.
-// It will recurse over any subdirectories and place all shared assets at the same level.
+// We assume that the documents are the root level
+// We assume that sub-folders are used for images.
 func findSharedDocs(path string, shared *pages.Shared) (err error) {
 
 	entries, err := os.ReadDir(path)
@@ -106,11 +138,33 @@ func findSharedDocs(path string, shared *pages.Shared) (err error) {
 		if !entry.IsDir() {
 			if entry.Name() == tocFileName {
 				shared.TOC = &pages.Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
-			} else {
+			} else if strings.HasSuffix(entry.Name(), ".md") {
 				shared.Docs[entry.Name()] = pages.Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
 			}
-		} else {
-			err = findSharedDocs(path+"/"+entry.Name(), shared)
+		} else if entry.Name() == pages.StaticFolderName {
+			err = findSharedImages(path+"/"+entry.Name(), shared)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func findSharedImages(path string, shared *pages.Shared) error {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			if isImageFile(entry.Name()) {
+				shared.Images[entry.Name()] = pages.Asset{SourcePath: path, What: pages.Image, Version: sharedVersion, Storage: entry}
+			}
+		} else if entry.Name() == pages.ImageFolderName {
+			err = findSharedImages(path+"/"+entry.Name(), shared)
 			if err != nil {
 				return err
 			}
@@ -125,7 +179,8 @@ func findSharedDocs(path string, shared *pages.Shared) (err error) {
 // It returns a Shared struct.
 func findShared(path string, entry os.DirEntry) (shared *pages.Shared, err error) {
 	shared = &pages.Shared{
-		Docs: make(map[string]pages.Doc),
+		Docs:   make(map[string]pages.Doc),
+		Images: make(map[string]pages.Asset),
 	}
 
 	sharedPath := path + "/" + entry.Name()
@@ -146,6 +201,7 @@ func findVersion(path string, entry os.DirEntry) (version *pages.Version, err er
 
 	version = &pages.Version{
 		Docs:    make(map[string]pages.Doc),
+		Images:  make(map[string]pages.Asset),
 		Version: entry.Name(),
 	}
 
@@ -158,4 +214,18 @@ func findVersion(path string, entry os.DirEntry) (version *pages.Version, err er
 
 	return version, nil
 
+}
+
+// Helper function to check if a file has an image extension
+func isImageFile(filename string) bool {
+	// Define a list of image file extensions
+	imageExtensions := []string{".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg"}
+
+	// Check if the filename ends with any of the image extensions
+	for _, ext := range imageExtensions {
+		if strings.HasSuffix(filename, ext) {
+			return true
+		}
+	}
+	return false
 }

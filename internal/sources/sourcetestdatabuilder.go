@@ -39,9 +39,17 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 					isDir: false,
 				},
 			},
+			ReadMe: &pages.Doc{
+				SourcePath: sourcePath,
+				Storage: fakeDirEntry{
+					name:  "README.md",
+					isDir: false,
+				},
+			},
 		},
 		Shared: &pages.Shared{
-			Docs: make(map[string]pages.Doc),
+			Docs:   make(map[string]pages.Doc),
+			Images: make(map[string]pages.Asset),
 		},
 		Versions: make(map[string]pages.Version),
 	}
@@ -79,6 +87,25 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			isDir: false,
 		}}
 
+	//add shared images
+	sources.Shared.Images["ImageOne.png"] = pages.Asset{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
+			name:  "ImageOne.png",
+			isDir: false,
+		},
+	}
+
+	sources.Shared.Images["ImageTwo.png"] = pages.Asset{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
+			name:  "ImageTwo.png",
+			isDir: false,
+		},
+	}
+
 	//add versions
 
 	//add versionNine docs
@@ -102,6 +129,25 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			name:  "DocumentTwo.md",
 			isDir: false,
 		}}
+
+	//add shared images
+	versionNine.Images["ImageThree.png"] = pages.Asset{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
+			name:  "ImageThree.png",
+			isDir: false,
+		},
+	}
+
+	versionNine.Images["ImageFour.png"] = pages.Asset{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
+			name:  "ImageFour.png",
+			isDir: false,
+		},
+	}
 
 	sources.Versions["9.0.0"] = versionNine
 
@@ -133,6 +179,25 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			name:  "DocumentFour.md",
 			isDir: false,
 		}}
+
+	//add shared images
+	versionTen.Images["ImageOne.png"] = pages.Asset{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
+			name:  "ImageThree.png",
+			isDir: false,
+		},
+	}
+
+	versionTen.Images["ImageThree.png"] = pages.Asset{
+		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		Version:    "shared",
+		Storage: fakeDirEntry{
+			name:  "ImageFour.png",
+			isDir: false,
+		},
+	}
 
 	sources.Versions["10.0.0"] = versionTen
 
