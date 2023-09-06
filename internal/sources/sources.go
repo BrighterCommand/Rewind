@@ -84,7 +84,7 @@ func findVersionedDocs(path string, version *pages.Version) (err error) {
 		if !entry.IsDir() {
 			if entry.Name() == tocFileName {
 				version.TOC = &pages.Doc{SourcePath: path, Version: version.Version, Storage: entry}
-			} else if strings.HasSuffix(entry.Name(), ".md") {
+			} else if isMarkDownFile(entry) {
 				version.Docs[entry.Name()] = pages.Doc{SourcePath: path, Version: version.Version, Storage: entry}
 			}
 		} else if entry.Name() == pages.StaticFolderName {
@@ -138,7 +138,7 @@ func findSharedDocs(path string, shared *pages.Shared) (err error) {
 		if !entry.IsDir() {
 			if entry.Name() == tocFileName {
 				shared.TOC = &pages.Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
-			} else if strings.HasSuffix(entry.Name(), ".md") {
+			} else if isMarkDownFile(entry) {
 				shared.Docs[entry.Name()] = pages.Doc{SourcePath: path, Version: sharedVersion, Storage: entry}
 			}
 		} else if entry.Name() == pages.StaticFolderName {
@@ -228,4 +228,8 @@ func isImageFile(filename string) bool {
 		}
 	}
 	return false
+}
+
+func isMarkDownFile(entry os.DirEntry) bool {
+	return strings.HasSuffix(entry.Name(), ".md")
 }
