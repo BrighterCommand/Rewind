@@ -4,9 +4,12 @@ Collates documents from folders to build a multi-version GitBook site
 ## Versioned Documentation
 
 For BrighterCommand to support multiple major versions, it needs to be able to support multiple versions of our documentation.
-With each new major version it is likely that something changes in the documentation but not everything changes. So to
-avoid "cut and paste" of all documents into the documentation for each version, we want to be able to copy the common
-documentation and then the version specific documentation to build the documentation for each version.
+With each new major version it is likely that something changes in the documentation but not everything changes. We need GitBook to
+offer at least two versions- current and last. But GitBook does not allow multiple links to the same file within the TOC. This
+means that wach version must have its own copy of any file in the TOC. If both 9.0.0 and 10.0.0 have the file Introduction, then
+each version's TOC must point to a separate copy of the file. So to avoid "cut and paste" of all documents into the documentation 
+for each version, we want to be able to copy the common files to each version and then the version specific documentation 
+to use with the TOC for each version.
 
 ## Directory structure
 
