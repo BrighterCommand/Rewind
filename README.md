@@ -10,7 +10,7 @@ means that each version must have its own copy of any file in the TOC. If both 9
 each version's TOC must point to a separate copy of the file. 
 
 So to avoid manually "cutting and pasting" the common documents into the each version, Rewind will copy the common files to each 
-version followe by the version specific documentation to use with the TOC for each version.
+version followed by the version specific documentation to use with the TOC for each version.
 
 ## Directory structure
 
