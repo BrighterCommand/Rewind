@@ -9,7 +9,7 @@ offer at least two versions- current and last. But GitBook does not allow multip
 means that each version must have its own copy of any file in the TOC. If both 9.0.0 and 10.0.0 have the file Introduction.md, then
 each version's TOC must point to a separate copy of the file. 
 
-So to avoid msnually "cutting and pasting" the common documents into the each version, Rewind will copy the common files to each 
+So to avoid manually "cutting and pasting" the common documents into the each version, Rewind will copy the common files to each 
 version followe by the version specific documentation to use with the TOC for each version.
 
 ## Directory structure
