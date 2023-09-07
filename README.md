@@ -10,21 +10,33 @@ documentation and then the version specific documentation to build the documenta
 
 ## Directory structure
 
+We take a directory structure that gives us the shared and versioned documents, and how to fit them into a TOC that covers both
+
 source
 - root - the root level files for a GitBook project. Readme, Summary, etc
-- shared - the documentation for Brighter or Darker that is common across all versions
-- v1 - the documentation for Brighter or Darker that is specific to V1
-- V2 - the documentation for Brighter or Darker that is specific to v2
+- shared - the documentation for Brighter or Darker that is common across all versions. .toc.yaml and .md files
+- 9.0.0 - the documentation for Brighter or Darker that is specific to V9. .toc.yaml and .md files
+  - _static\images - any images used by the docs
+- 10.0.0 - the documentation for Brighter or Darker that is specific to v10. .toc.yaml and .md files
+  - _static\images - any images used by the docs
+ 
+We then merge shared with each version and build the Summary.md file which from the .toc.yaml files
 
 docs - the root level files for a GitBook project. Readme, Summary, etc
-- v1 - the docs for v1
-- v2 - the docs for v2
+- 9.0.0 - the docs for v1
+  - _static\images - any images used by the docs
+- 10.0.0 - the docs for v2
+  - _static\images - any images used by the docs
 
 ## Building the documentation
 
 When we build the documentation for a version, we copy shared, then the documentation for each version. This means that 
-if you have shared and V1 and V2, you will need to include docs from V1 that should appear in V2, within V2. In a later
-version we may change this so that we include V1 within V2, but for now, we are keeping it simple.
+if you have shared and 9.0.0 and 10.0.0, any docs that appear in both 9.0.0 and 10.0.0 should appear in shared. We won't copy 
+from 9.0.0 to 10.0.0. 
+
+This works to support two versions => the tip of the spear and the last release. If we want to support documentation for three versions
+this would get more complicated as we would need to flow documents from one version to the next i.e. 8.0.0 to 9.0.0 to 10.0.0 unless 
+overwritten. This is out-of-scope as we have no plans to support three versions right now.
 
 ## Table of Contents
 
