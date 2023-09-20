@@ -1,11 +1,22 @@
+---
 Brighter Configuration:
-- name   : Document One
-  file   : DocumentOne.md
-  indent : 1
-- name : Document Two
-  file : DocumentTwo.md
-  indent : 2
+  order: 10
+  entries:
+  - name   : Document One
+    file   : DocumentOne.md
+    order : 100
+  - name : Document Two
+    file : DocumentTwo.md
+    order : 200
+
 Darker Configuration:
-- name   : Document Three
-  file   : DocumentThree.md
-  indent : 1
+  order: 20
+  entries:
+  - name   : Document Four
+    file   : DocumentFour.md
+    order : 100
+  - name   : Document Three
+    file   : DocumentThree.md
+    order : 200
+...
+

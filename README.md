@@ -45,10 +45,14 @@ file's entry to be in the table of contents. The indent is optional and defaults
 Assuming the following .toc.yaml file was located in the root of a v9.0.0 folder
 
 ```yaml
+---
 Brighter Configuration:
-- filename: GettingStarted.md
-  title: Getting Started
-  indent: 1
+  order: 10
+  entries:
+  - name: Getting Started
+    file: GettingStarted.md
+    order: 100
+...
 ```
 
 this will yield the following in the SUMMARY.md file
@@ -60,7 +64,13 @@ this will yield the following in the SUMMARY.md file
 
 ### Ordering
 
-NOTE: WE NEED TO THINK ABOUT HOW WE WOULD ORDER ENTRIES. THIS MAY ALSO SOLVE THE ERRATIC TEST PROBLEM!!
+Ordering lets you order the sections in the table of contents. For entries it may make sense to use an ordering of 100, 
+200, 300, etc. to allow interpolcation of entries within a section in the future. For sections it may make sense to use 
+10, 20, 30, etc.
+
+We need ordering because we can't guarantee the order of the keys in a map. This is because the order of keys in a map
+is not defined in the YAML specification. In practice, most YAML parsers preserve the order of keys. However, we can't
+guarantee that the order will be preserved in the future. So we use an explicit ordering.
 
 ### Anchor Links
 

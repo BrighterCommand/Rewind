@@ -50,8 +50,8 @@ func TestBookBuilder(t *testing.T) {
 		t.Errorf("Error getting working directory: %s", err)
 	}
 
-	sourcePath := strings.Replace(mydir, "internal", "test/source", 1)
-	destPath := strings.Replace(mydir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
+	sourcePath := strings.Replace(mydir, "internal/book", "test/source", 1)
+	destPath := strings.Replace(mydir, "internal/book", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
 	var src = sources.SourceTestDataBuilder(sourcePath, mydir)
 	book, err := MakeBook(src, destPath)

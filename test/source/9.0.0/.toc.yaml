@@ -1,4 +1,9 @@
+---
 Brighter Configuration:
+  order: 10
+  entries:
   - name : Document Two
     file : DocumentTwo.md
-    indent: 2
+    order: 200
+...
+

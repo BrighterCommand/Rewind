@@ -56,7 +56,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 
 	//add shared docs
 	sources.Shared.TOC = &pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  ".toc.yaml",
@@ -64,7 +64,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		}}
 
 	sources.Shared.Docs["DocumentOne.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "DocumentOne.md",
@@ -72,7 +72,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		}}
 
 	sources.Shared.Docs["DocumentTwo.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "DocumentTwo.md",
@@ -80,7 +80,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		}}
 
 	sources.Shared.Docs["DocumentThree.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "DocumentThree.md",
@@ -89,7 +89,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 
 	//add shared images
 	sources.Shared.Images["ImageOne.png"] = pages.Asset{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared/_static/images", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "ImageOne.png",
@@ -98,7 +98,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	}
 
 	sources.Shared.Images["ImageTwo.png"] = pages.Asset{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared/_static/images", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "ImageTwo.png",
@@ -111,11 +111,12 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	//add versionNine docs
 	versionNine := pages.Version{
 		Docs:    make(map[string]pages.Doc),
+		Images:  make(map[string]pages.Asset),
 		Version: "9.0.0",
 	}
 
 	versionNine.TOC = &pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/9.0.0", 1),
 		Version:    "9.0.0",
 		Storage: fakeDirEntry{
 			name:  ".toc.yaml",
@@ -123,7 +124,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		}}
 
 	versionNine.Docs["DocumentTwo.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/9.0.0", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/9.0.0", 1),
 		Version:    "9.0.0",
 		Storage: fakeDirEntry{
 			name:  "DocumentTwo.md",
@@ -132,7 +133,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 
 	//add shared images
 	versionNine.Images["ImageThree.png"] = pages.Asset{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared/_static/images", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "ImageThree.png",
@@ -141,7 +142,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	}
 
 	versionNine.Images["ImageFour.png"] = pages.Asset{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared/_static/images", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "ImageFour.png",
@@ -153,11 +154,12 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 
 	versionTen := pages.Version{
 		Docs:    make(map[string]pages.Doc),
+		Images:  make(map[string]pages.Asset),
 		Version: "10.0.0",
 	}
 
 	versionTen.TOC = &pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{
 			name:  ".toc.yaml",
@@ -165,7 +167,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		}}
 
 	versionTen.Docs["DocumentOne.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{
 			name:  "DocumentOne.md",
@@ -173,7 +175,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		}}
 
 	versionTen.Docs["DocumentFour.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/10.0.0", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10.0.0", 1),
 		Version:    "10.0.0",
 		Storage: fakeDirEntry{
 			name:  "DocumentFour.md",
@@ -182,7 +184,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 
 	//add shared images
 	versionTen.Images["ImageOne.png"] = pages.Asset{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		SourcePath: strings.Replace(mydir, "interna/bookl", "test/source/shared/_static/images", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "ImageThree.png",
@@ -191,7 +193,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	}
 
 	versionTen.Images["ImageThree.png"] = pages.Asset{
-		SourcePath: strings.Replace(mydir, "internal", "test/source/shared/_static/images", 1),
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/shared/_static/images", 1),
 		Version:    "shared",
 		Storage: fakeDirEntry{
 			name:  "ImageFour.png",

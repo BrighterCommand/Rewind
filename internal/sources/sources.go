@@ -69,7 +69,7 @@ func (s *Sources) FindFromPath(root string) error {
 }
 
 // findVersionedDocs finds the versioned documents for the book.
-// It takes a directory entry and an Version struct.
+// It takes a directory entry and a Version struct.
 // It returns an error.
 // We assume that all documents are in the root of the version folder.
 // We assume that sub-folders are used for images.

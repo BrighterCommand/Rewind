@@ -1,7 +1,12 @@
+---
 Brighter Configuration:
+  order: 10
+  entries:
   - name : Document One
     file : DocumentOne.md
-    indent : 1
+    order : 100
   - name : Document Four
     file : DocumentFour.md
-    indent : 1
+    order : 200
+...
+

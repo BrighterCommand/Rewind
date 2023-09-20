@@ -107,9 +107,6 @@ func (b *Book) MakeVersions(s *sources.Sources) {
 	}
 }
 
-type toc map[string][]pages.TOCEntry
-type versionedToc map[string]toc
-
 func (b *Book) MakeTOC(s *sources.Sources) error {
 
 	entries, err := b.buildEntries(s)
@@ -137,8 +134,8 @@ func (b *Book) ClearWorkDir() error {
 	return os.RemoveAll(b.Root.WorkDir)
 }
 
-func (b *Book) buildEntries(s *sources.Sources) (*versionedToc, error) {
-	var summary = make(versionedToc)
+func (b *Book) buildEntries(s *sources.Sources) (*pages.VersionedToc, error) {
+	var summary = make(pages.VersionedToc)
 
 	shared, err := b.loadSharedEntries(s)
 	if err != nil {
@@ -147,23 +144,24 @@ func (b *Book) buildEntries(s *sources.Sources) (*versionedToc, error) {
 
 	for _, version := range s.Versions {
 
-		configuration, err := b.buildVersionEntries(shared, version)
+		versionEntries, err := b.buildVersionEntries(shared, version)
 		if err != nil {
 			return nil, err
 		}
-		summary[version.Version] = configuration
+		summary[version.Version] = versionEntries
 	}
 	return &summary, nil
 }
 
-func (b *Book) loadSharedEntries(s *sources.Sources) (toc, error) {
+func (b *Book) loadSharedEntries(s *sources.Sources) (pages.Toc, error) {
 	file, err := os.ReadFile(s.Shared.TOC.SourcePath + "/" + s.Shared.TOC.Storage.Name())
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
 
-	shared := make(toc)
+	shared := make(pages.Toc)
+	shared.Entries = make([]pages.TOCEntry, 0)
 
 	err = yaml.Unmarshal(file, &shared)
 	if err != nil {
@@ -173,27 +171,35 @@ func (b *Book) loadSharedEntries(s *sources.Sources) (toc, error) {
 	return shared, nil
 }
 
-func (b *Book) buildVersionEntries(shared toc, version pages.Version) (toc, error) {
+func (b *Book) buildVersionEntries(shared pages.Toc, version pages.Version) (pages.Toc, error) {
 	//merge the shared and versioned information
-	configuration := make(toc)
+	versionedSections := make(pages.Toc)
 
-	b.addSharedEntries(shared, configuration)
+	b.addSharedSections(shared, &versionedSections)
 
-	t, err := b.addVersionedEntries(version, configuration)
+	t, err := b.addVersionedSections(version, versionedSections)
 	if err != nil {
 		return t, err
 	}
-	return configuration, nil
+	return versionedSections, nil
 }
 
-func (b *Book) addSharedEntries(shared toc, configuration toc) {
+func (b *Book) addSharedSections(shared pages.Toc, versionedEntries *pages.Toc) {
+
+	var toc = make(pages.Toc)
+
 	//add the shared information for each configuration
-	for key, sharedEntry := range shared {
-		configuration[key] = sharedEntry
+	for key, section := range shared {
+		//TODO: append to this array
+		for e, sharedEntry := range section.Entries {
+			toc[key].Entries[e] = sharedEntry
+		}
 	}
+
+	versionedEntries = &toc
 }
 
-func (b *Book) addVersionedEntries(version pages.Version, configuration toc) (toc, error) {
+func (b *Book) addVersionedSections(version pages.Version, versionedTOC pages.Toc) (pages.Toc, error) {
 	//read the versioned information
 	file, err := os.ReadFile(version.TOC.SourcePath + "/" + version.TOC.Storage.Name())
 	if err != nil {
@@ -201,7 +207,7 @@ func (b *Book) addVersionedEntries(version pages.Version, configuration toc) (to
 		return nil, err
 	}
 
-	versioned := make(toc)
+	versioned := make(pages.Toc)
 
 	err = yaml.Unmarshal(file, &versioned)
 	if err != nil {
@@ -209,26 +215,32 @@ func (b *Book) addVersionedEntries(version pages.Version, configuration toc) (to
 		return nil, err
 	}
 
-	//for each toc in the sharedVersion
-	for versionSection, versionTOC := range versioned {
-		//iterate over our shared toc entries
+	//for each ection in the version
+	for v, i := range versioned {
+		//iterate over the shared toc sections we have already added
 		sectionExists := false
-		for sharedSection, sharedTOC := range configuration {
-			if versionSection == sharedSection {
+		for s, j := range versionedTOC {
+			//if we already have that section
+			if v == s {
+
 				sectionExists = true
+				j.Order = i.Order
+
 				//we already have this section and map values need to be re-assigned not changed
 				var entries = make([]pages.TOCEntry, 0)
+
 				//add the shared entries
-				for _, sharedEntry := range sharedTOC {
+				for _, sharedEntry := range j.Entries {
 					entries = append(entries, sharedEntry)
 				}
+
 				//iterate over versioned entries
-				for _, versionedEntry := range versionTOC {
+				for _, versionedEntry := range i.Entries {
 					found := false
-					for i, se := range entries {
+					for k, se := range entries {
 						//if we have a matching shared entry replace it with the versioned one
 						if se.Name == versionedEntry.Name {
-							entries[i] = versionedEntry
+							entries[k] = versionedEntry
 							found = true
 							break
 						}
@@ -238,15 +250,16 @@ func (b *Book) addVersionedEntries(version pages.Version, configuration toc) (to
 						entries = append(entries, versionedEntry)
 					}
 				}
-				configuration[sharedSection] = entries
+
+				j.Entries = entries
 			}
 		}
 		//if it is not an existing section, just add it
 		if !sectionExists {
-			configuration[versionSection] = versionTOC
+			versionedTOC = versioned
 		}
 	}
-	return nil, nil
+	return versioned, nil
 }
 
 // copyFile copies a file from sourcePath to destPath

@@ -47,11 +47,16 @@ type Shared struct {
 	TOC    *Doc
 }
 
+type TOCSection struct {
+	Order   int        `yaml:"order"`
+	Entries []TOCEntry `yaml:"entries"`
+}
+
 // TOCEntry A table of contents entry.
 type TOCEntry struct {
-	Name   string
-	File   string
-	Indent int
+	Name  string `yaml:"name"`
+	File  string `yaml:"file"`
+	Order int    `yaml:"order"`
 }
 
 // Version Docs & Assets for a version of the book
@@ -62,3 +67,7 @@ type Version struct {
 	TOC      *Doc
 	Version  string
 }
+
+type Toc map[string]TOCSection
+
+type VersionedToc map[string]Toc

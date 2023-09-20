@@ -18,15 +18,15 @@ func newMarkdownGenerator() *markdownGenerator {
 	}
 }
 
-func (g *markdownGenerator) GenerateSummary(entries *versionedToc, summary *os.File) error {
+func (g *markdownGenerator) GenerateSummary(entries *pages.VersionedToc, summary *os.File) error {
 
 	for version, toc := range *entries {
 		g.WriteVersion(version)
 		g.WriteLine()
-		for section, entries := range toc {
-			g.WriteSection(section)
+		for s, section := range toc {
+			g.WriteSection(s)
 			g.WriteLine()
-			g.WriteTOCs(entries, version)
+			g.WriteTOCs(section, version)
 			g.WriteLine()
 		}
 	}
@@ -53,9 +53,9 @@ func (g *markdownGenerator) WriteSection(section string) {
 	g.buffer.WriteString("\n")
 }
 
-func (g *markdownGenerator) WriteTOCs(entries []pages.TOCEntry, version string) {
-	for _, entry := range entries {
-		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, g.getLinkPath(entry, version), entry.Indent))
+func (g *markdownGenerator) WriteTOCs(s pages.TOCSection, version string) {
+	for _, entry := range s.Entries {
+		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, g.getLinkPath(entry, version), entry.Order))
 		g.buffer.WriteString("\n")
 	}
 }
