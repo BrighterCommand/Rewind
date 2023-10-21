@@ -47,6 +47,7 @@ type Shared struct {
 	TOC    *Doc
 }
 
+// TOCSection A table of contents section - the name of the section is held in the Toc map below.
 type TOCSection struct {
 	Order   int        `yaml:"order"`
 	Entries []TOCEntry `yaml:"entries"`
@@ -66,6 +67,11 @@ type Version struct {
 	Images   map[string]Asset
 	TOC      *Doc
 	Version  string
+}
+
+type OrderedTocSection struct {
+	Name    string
+	Section TOCSection
 }
 
 type Toc map[string]TOCSection

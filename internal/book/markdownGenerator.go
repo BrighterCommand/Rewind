@@ -26,7 +26,7 @@ func (g *markdownGenerator) GenerateSummary(entries *pages.VersionedToc, summary
 		for s, section := range toc {
 			g.WriteSection(s)
 			g.WriteLine()
-			g.WriteTOCs(section, version)
+			g.WriteTOCs(section.Entries, version)
 			g.WriteLine()
 		}
 	}
@@ -53,8 +53,8 @@ func (g *markdownGenerator) WriteSection(section string) {
 	g.buffer.WriteString("\n")
 }
 
-func (g *markdownGenerator) WriteTOCs(s pages.TOCSection, version string) {
-	for _, entry := range s.Entries {
+func (g *markdownGenerator) WriteTOCs(s []pages.TOCEntry, version string) {
+	for _, entry := range s {
 		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, g.getLinkPath(entry, version), entry.Order))
 		g.buffer.WriteString("\n")
 	}

@@ -161,7 +161,6 @@ func (b *Book) loadSharedEntries(s *sources.Sources) (pages.Toc, error) {
 	}
 
 	shared := make(pages.Toc)
-	shared.Entries = make([]pages.TOCEntry, 0)
 
 	err = yaml.Unmarshal(file, &shared)
 	if err != nil {
@@ -175,36 +174,37 @@ func (b *Book) buildVersionEntries(shared pages.Toc, version pages.Version) (pag
 	//merge the shared and versioned information
 	versionedSections := make(pages.Toc)
 
-	b.addSharedSections(shared, &versionedSections)
+	b.addSharedSections(shared, versionedSections)
 
-	t, err := b.addVersionedSections(version, versionedSections)
+	err := b.addVersionedSections(version, versionedSections)
 	if err != nil {
-		return t, err
+		return nil, err
 	}
 	return versionedSections, nil
 }
 
-func (b *Book) addSharedSections(shared pages.Toc, versionedEntries *pages.Toc) {
-
-	var toc = make(pages.Toc)
+func (b *Book) addSharedSections(shared pages.Toc, versionedEntries pages.Toc) {
 
 	//add the shared information for each configuration
 	for key, section := range shared {
-		//TODO: append to this array
-		for e, sharedEntry := range section.Entries {
-			toc[key].Entries[e] = sharedEntry
+		versionedSection := pages.TOCSection{
+			Order: section.Order,
 		}
+		versionedSectionEntries := make([]pages.TOCEntry, 0)
+		for _, sharedEntry := range section.Entries {
+			versionedSectionEntries = append(versionedSectionEntries, sharedEntry)
+		}
+		versionedSection.Entries = versionedSectionEntries
+		versionedEntries[key] = versionedSection
 	}
-
-	versionedEntries = &toc
 }
 
-func (b *Book) addVersionedSections(version pages.Version, versionedTOC pages.Toc) (pages.Toc, error) {
+func (b *Book) addVersionedSections(version pages.Version, versionedTOC pages.Toc) error {
 	//read the versioned information
 	file, err := os.ReadFile(version.TOC.SourcePath + "/" + version.TOC.Storage.Name())
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return err
 	}
 
 	versioned := make(pages.Toc)
@@ -212,7 +212,7 @@ func (b *Book) addVersionedSections(version pages.Version, versionedTOC pages.To
 	err = yaml.Unmarshal(file, &versioned)
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return err
 	}
 
 	//for each ection in the version
@@ -256,10 +256,10 @@ func (b *Book) addVersionedSections(version pages.Version, versionedTOC pages.To
 		}
 		//if it is not an existing section, just add it
 		if !sectionExists {
-			versionedTOC = versioned
+			versionedTOC[v] = i
 		}
 	}
-	return versioned, nil
+	return nil
 }
 
 // copyFile copies a file from sourcePath to destPath

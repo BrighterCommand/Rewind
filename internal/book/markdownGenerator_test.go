@@ -1,6 +1,11 @@
 package book
 
-/*
+import (
+	"github.com/brightercommand/Rewind/internal/pages"
+	"strings"
+	"testing"
+)
+
 func TestMarkdownGenerator(t *testing.T) {
 	generator := newMarkdownGenerator()
 	generator.WriteVersion("v9.0.0")
@@ -9,13 +14,13 @@ func TestMarkdownGenerator(t *testing.T) {
 	generator.WriteLine()
 	generator.WriteTOCs([]pages.TOCEntry{
 		{
-			Name:   "DocumentOne",
-			File:   "DocumentOne.md",
+			Name:  "DocumentOne",
+			File:  "DocumentOne.md",
 			Order: 1,
 		},
 		{
-			Name:   "DocumentTwo",
-			File:   "DocumentTwo.md",
+			Name:  "DocumentTwo",
+			File:  "DocumentTwo.md",
 			Order: 1,
 		},
 	}, "9.0.0")
@@ -25,8 +30,8 @@ func TestMarkdownGenerator(t *testing.T) {
 	generator.WriteLine()
 	generator.WriteTOCs([]pages.TOCEntry{
 		{
-			Name:   "DocumentThree",
-			File:   "DocumentThree.md",
+			Name:  "DocumentThree",
+			File:  "DocumentThree.md",
 			Order: 1,
 		},
 	}, "10.0.0")
@@ -37,5 +42,3 @@ func TestMarkdownGenerator(t *testing.T) {
 		t.Errorf("Markdown does not match, expected %s got %s", expected, markdown)
 	}
 }
-
-*/
