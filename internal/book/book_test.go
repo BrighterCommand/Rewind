@@ -245,8 +245,8 @@ func TestBookCreation(t *testing.T) {
 		t.Errorf("Error getting working directory: %s", err)
 	}
 
-	sourcePath := strings.Replace(myDir, "internal", "test/source", 1)
-	destPath := strings.Replace(myDir, "internal", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
+	sourcePath := strings.Replace(myDir, "internal/book", "test/source", 1)
+	destPath := strings.Replace(myDir, "internal/book", fmt.Sprintf("test/docs/%s", uuid.New().String()), 1)
 
 	src := sources.NewSources()
 	err = src.FindFromPath(sourcePath)
@@ -273,7 +273,7 @@ func TestBookCreation(t *testing.T) {
 	for _, entry := range entries {
 		if entry.Name() == "SUMMARY.md" {
 			summaryFound = true
-		} else if entry.Name() == "..gitbook.yaml" {
+		} else if entry.Name() == ".gitbook.yaml" {
 			gitbookFound = true
 		} else if entry.IsDir() {
 			if entry.Name() == "contents" {
@@ -309,7 +309,7 @@ func TestBookCreation(t *testing.T) {
 	}
 
 	if gitbookFound == false {
-		t.Errorf("Expected ..gitbook.yaml")
+		t.Errorf("Expected .gitbook.yaml")
 	}
 
 	if v9Found == false {

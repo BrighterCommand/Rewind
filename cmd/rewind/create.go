@@ -17,10 +17,10 @@ var makeBookCmd = &cobra.Command{
                 - shared //common docs
 				    - .toc.yaml // table of contents
                     - doc.md // one or more markdown files
-				- 1.0.0	// version number
+				- 1	// version number
 				    - .toc.yaml // table of contents
                     - doc.md // one or more markdown files
-                - 2.0.0 //version number
+                - 2 //version number
 				    - .toc.yaml // table of contents
                     - doc.md // one or more markdown files
 			Expects a destination path to write the gitbook directory to.`,

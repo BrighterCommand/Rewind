@@ -18,15 +18,15 @@ func newMarkdownGenerator() *markdownGenerator {
 	}
 }
 
-func (g *markdownGenerator) GenerateSummary(entries *pages.VersionedToc, summary *os.File) error {
+func (g *markdownGenerator) GenerateSummary(entries []pages.OrderedVersionTocs, summary *os.File) error {
 
-	for version, toc := range *entries {
-		g.WriteVersion(version)
+	for _, toc := range entries {
+		g.WriteVersion(toc.Version)
 		g.WriteLine()
-		for s, section := range toc {
-			g.WriteSection(s)
+		for _, section := range toc.Sections {
+			g.WriteSection(section.Name)
 			g.WriteLine()
-			g.WriteTOCs(section.Entries, version)
+			g.WriteTOCs(section.Section.Entries, toc.Version)
 			g.WriteLine()
 		}
 	}

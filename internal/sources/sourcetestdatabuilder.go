@@ -35,7 +35,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 			GitBook: &pages.Doc{
 				SourcePath: sourcePath,
 				Storage: fakeDirEntry{
-					name:  "..gitbook.yaml",
+					name:  ".gitbook.yaml",
 					isDir: false,
 				},
 			},
@@ -46,6 +46,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 					isDir: false,
 				},
 			},
+			SourcePath: sourcePath,
 		},
 		Shared: &pages.Shared{
 			Docs:   make(map[string]pages.Doc),
@@ -201,7 +202,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		},
 	}
 
-	sources.Versions["9"] = versionTen
+	sources.Versions["10"] = versionTen
 
 	return sources
 }

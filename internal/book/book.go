@@ -114,6 +114,8 @@ func (b *Book) MakeTOC(s *sources.Sources) error {
 		return err
 	}
 
+	orderedTocs := entries.Sort()
+
 	//create a workdir
 	b.Root.WorkDir, err = os.MkdirTemp(s.Root.SourcePath, "summary")
 
@@ -125,7 +127,7 @@ func (b *Book) MakeTOC(s *sources.Sources) error {
 	defer summary.Close()
 
 	mg := newMarkdownGenerator()
-	err = mg.GenerateSummary(entries, summary)
+	err = mg.GenerateSummary(orderedTocs, summary)
 
 	return nil
 }
