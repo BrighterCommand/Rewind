@@ -231,7 +231,7 @@ func checkTOC(t *testing.T, book *Book, sourcePath string, destPath string) {
 	got := markdown.Render(doc, renderer)
 	toc := fmt.Sprintf("%s", got)
 
-	expectedTOC := "## 9\n### Brighter Configuration\n* [Document One](/contents/9/DocumentOne.md)\n    * [Document Two](/contents/9/DocumentTwo.md)\n### Darker Configuration\n* [Document Three](/contents/9/DocumentThree.md)\n## 10\n### Brighter Configuration\n* [Document One](/contents/10/DocumentOne.md)\n    * [Document Two](/contents/10/DocumentTwo.md)\n* [Document Four](/contents/10/DocumentFour.md)\n### Darker Configuration\n* [Document Three](/contents/10/DocumentThree.md)\n"
+	expectedTOC := "## 9\n### Brighter Configuration\n* [Document One](/contents/9/DocumentOne.md)\n* [Document Two](/contents/9/DocumentTwo.md)\n### Darker Configuration\n* [Document Four](/contents/9/DocumentFour.md)\n* [Document Three](/contents/9/DocumentThree.md)\n## 10\n### Brighter Configuration\n* [Document One](/contents/10/DocumentOne.md)\n* [Document Two](/contents/10/DocumentTwo.md)\n### Darker Configuration\n* [Document Four](/contents/10/DocumentFour.md)\n* [Document Three](/contents/10/DocumentThree.md)\n"
 	if toc != expectedTOC {
 		t.Errorf("Expected %s, got %s", expectedTOC, toc)
 	}

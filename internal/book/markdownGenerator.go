@@ -55,7 +55,7 @@ func (g *markdownGenerator) WriteSection(section string) {
 
 func (g *markdownGenerator) WriteTOCs(s []pages.TOCEntry, version string) {
 	for _, entry := range s {
-		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, g.getLinkPath(entry, version), entry.Order))
+		g.buffer.WriteString(g.getListItemWithIndent(entry.Name, g.getLinkPath(entry, version)))
 		g.buffer.WriteString("\n")
 	}
 }
@@ -71,8 +71,8 @@ func (m *markdownGenerator) getLink(desc, url string) string {
 	return fmt.Sprintf("[%s](%s)", desc, url)
 }
 
-func (m *markdownGenerator) getListItemWithIndent(desc, url string, indent int) string {
-	return strings.Repeat("  ", indent) + "*" + " " + m.getLink(desc, url)
+func (m *markdownGenerator) getListItemWithIndent(desc, url string) string {
+	return " " + "*" + " " + m.getLink(desc, url)
 }
 
 func (m *markdownGenerator) getTitle(content string, level int) string {
