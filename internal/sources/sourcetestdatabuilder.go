@@ -112,20 +112,20 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 	versionNine := pages.Version{
 		Docs:    make(map[string]pages.Doc),
 		Images:  make(map[string]pages.Asset),
-		Version: "9.0.0",
+		Version: "9",
 	}
 
 	versionNine.TOC = &pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal/book", "test/source/9.0.0", 1),
-		Version:    "9.0.0",
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/9", 1),
+		Version:    "9",
 		Storage: fakeDirEntry{
 			name:  ".toc.yaml",
 			isDir: false,
 		}}
 
 	versionNine.Docs["DocumentTwo.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal/book", "test/source/9.0.0", 1),
-		Version:    "9.0.0",
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/9", 1),
+		Version:    "9",
 		Storage: fakeDirEntry{
 			name:  "DocumentTwo.md",
 			isDir: false,
@@ -150,33 +150,33 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		},
 	}
 
-	sources.Versions["9.0.0"] = versionNine
+	sources.Versions["9"] = versionNine
 
 	versionTen := pages.Version{
 		Docs:    make(map[string]pages.Doc),
 		Images:  make(map[string]pages.Asset),
-		Version: "10.0.0",
+		Version: "10",
 	}
 
 	versionTen.TOC = &pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10.0.0", 1),
-		Version:    "10.0.0",
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10", 1),
+		Version:    "10",
 		Storage: fakeDirEntry{
 			name:  ".toc.yaml",
 			isDir: false,
 		}}
 
 	versionTen.Docs["DocumentOne.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10.0.0", 1),
-		Version:    "10.0.0",
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10", 1),
+		Version:    "10",
 		Storage: fakeDirEntry{
 			name:  "DocumentOne.md",
 			isDir: false,
 		}}
 
 	versionTen.Docs["DocumentFour.md"] = pages.Doc{
-		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10.0.0", 1),
-		Version:    "10.0.0",
+		SourcePath: strings.Replace(mydir, "internal/book", "test/source/10", 1),
+		Version:    "10",
 		Storage: fakeDirEntry{
 			name:  "DocumentFour.md",
 			isDir: false,
@@ -201,7 +201,7 @@ func SourceTestDataBuilder(sourcePath string, mydir string) *Sources {
 		},
 	}
 
-	sources.Versions["10.0.0"] = versionTen
+	sources.Versions["9"] = versionTen
 
 	return sources
 }

@@ -8,7 +8,7 @@ import (
 
 func TestMarkdownGenerator(t *testing.T) {
 	generator := newMarkdownGenerator()
-	generator.WriteVersion("v9.0.0")
+	generator.WriteVersion("9")
 	generator.WriteLine()
 	generator.WriteSection("BrighterConfiguration")
 	generator.WriteLine()
@@ -23,7 +23,7 @@ func TestMarkdownGenerator(t *testing.T) {
 			File:  "DocumentTwo.md",
 			Order: 1,
 		},
-	}, "9.0.0")
+	}, "9")
 
 	generator.WriteLine()
 	generator.WriteSection("DarkerConfiguration")
@@ -34,10 +34,10 @@ func TestMarkdownGenerator(t *testing.T) {
 			File:  "DocumentThree.md",
 			Order: 1,
 		},
-	}, "10.0.0")
+	}, "9")
 
 	markdown := generator.buffer.String()
-	expected := "## v9.0.0\n\n### BrighterConfiguration\n\n  * [DocumentOne](/contents/9.0.0/DocumentOne.md)\n  * [DocumentTwo](/contents/9.0.0/DocumentTwo.md)\n\n### DarkerConfiguration\n\n  * [DocumentThree](/contents/10.0.0/DocumentThree.md)\n"
+	expected := "## 9\n\n### BrighterConfiguration\n\n  * [DocumentOne](/contents/9/DocumentOne.md)\n  * [DocumentTwo](/contents/9/DocumentTwo.md)\n\n### DarkerConfiguration\n\n  * [DocumentThree](/contents/9/DocumentThree.md)\n"
 	if !strings.EqualFold(markdown, expected) {
 		t.Errorf("Markdown does not match, expected %s got %s", expected, markdown)
 	}

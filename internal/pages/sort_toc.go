@@ -1,30 +1,59 @@
 package pages
 
-func (t *Toc) Sort() (ordered []OrderedTocSection) {
+import "strconv"
 
-	for sectionName, section := range *t {
-		orderedSection := OrderedTocSection{
-			Name:    sectionName,
-			Section: section,
+func (t *VersionedToc) Sort() (ordered []OrderedVersionTocs) {
+
+	//Turn a VersionedToc into an array of OrderedVersionToc
+	for versionName, toc := range *t {
+		order, _ := strconv.Atoi(versionName)
+		orderedVersion := OrderedVersionTocs{
+			Version: versionName,
+			Order:   order,
 		}
-		ordered = append(ordered, orderedSection)
+
+		for sectionName, section := range toc {
+			orderedSection := OrderedTocSection{
+				Name:    sectionName,
+				Section: section,
+			}
+			orderedVersion.Sections = append(orderedVersion.Sections, orderedSection)
+		}
+
+		ordered = append(ordered, orderedVersion)
+
 	}
 
-	//sort the sections
+	//Now sort the OrderedVersionToc by their order fields
+
+	//sort the versions
 	for i := 0; i < len(ordered); i++ {
 		for j := i + 1; j < len(ordered); j++ {
-			if ordered[i].Section.Order > ordered[j].Section.Order {
+			if ordered[i].Order > ordered[j].Order {
 				ordered[i], ordered[j] = ordered[j], ordered[i]
 			}
 		}
 	}
 
-	//sort the entries
+	//now for each of the versions, sort their sections
 	for i := 0; i < len(ordered); i++ {
-		for k := 0; k < len(ordered[i].Section.Entries); k++ {
-			for l := k + 1; l < len(ordered[i].Section.Entries); l++ {
-				if ordered[i].Section.Entries[k].Order > ordered[i].Section.Entries[l].Order {
-					ordered[i].Section.Entries[k], ordered[i].Section.Entries[l] = ordered[i].Section.Entries[l], ordered[i].Section.Entries[k]
+		for k := 0; k < len(ordered[i].Sections); k++ {
+			for l := k + 1; l < len(ordered[i].Sections); l++ {
+				if ordered[i].Sections[k].Section.Order > ordered[i].Sections[l].Section.Order {
+					ordered[i].Sections[k], ordered[i].Sections[l] = ordered[i].Sections[l], ordered[i].Sections[k]
+				}
+			}
+		}
+	}
+
+	// now sort the entries in those sections
+	for i := 0; i < len(ordered); i++ {
+		for j := 0; j < len(ordered[i].Sections); j++ {
+			for k := 0; k < len(ordered[i].Sections[j].Section.Entries); k++ {
+				for l := k + 1; l < len(ordered[i].Sections[j].Section.Entries); l++ {
+					if ordered[i].Sections[j].Section.Entries[k].Order > ordered[i].Sections[j].Section.Entries[l].Order {
+						ordered[i].Sections[j].Section.Entries[k], ordered[i].Sections[j].Section.Entries[l] = ordered[i].Sections[j].Section.Entries[l], ordered[i].Sections[j].Section.Entries[k]
+					}
 				}
 			}
 		}

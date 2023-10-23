@@ -100,20 +100,20 @@ func checkBookRoot(t *testing.T, book *Book, destPath string, sources *sources.S
 func checkVersion9(t *testing.T, book *Book, destPath string, sourcePath string) {
 	var documentOneFound, documentTwoFound, documentThreeFound bool
 
-	versionNine := book.Versions["9.0.0"]
-	if versionNine.Version != "9.0.0" {
-		t.Errorf("Expected 9.0.0, got %s", book.Versions["9.0.0"].Version)
+	versionNine := book.Versions["9"]
+	if versionNine.Version != "9" {
+		t.Errorf("Expected 9, got %s", book.Versions["9"].Version)
 	}
 
-	if versionNine.DestPath != fmt.Sprintf("%s/contents/9.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/contents/9.0.0", destPath), versionNine.DestPath)
+	if versionNine.DestPath != fmt.Sprintf("%s/contents/9", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/contents/9", destPath), versionNine.DestPath)
 	}
 
 	if len(versionNine.Docs) != 3 {
 		t.Errorf("Expected 3 docs, got %d", len(versionNine.Docs))
 	}
 
-	var expectedSourcePath = fmt.Sprintf("%s/9.0.0", sourcePath)
+	var expectedSourcePath = fmt.Sprintf("%s/9", sourcePath)
 	sharedSourcePath := fmt.Sprintf("%s/Shared", sourcePath)
 	for _, doc := range versionNine.Docs {
 		if doc.Storage.Name() == "DocumentOne.md" {
@@ -141,7 +141,7 @@ func checkVersion9(t *testing.T, book *Book, destPath string, sourcePath string)
 	}
 
 	if !(documentOneFound && documentTwoFound && documentThreeFound) {
-		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md in v9.0.0")
+		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md in version 9")
 	}
 	return
 }
@@ -149,20 +149,20 @@ func checkVersion9(t *testing.T, book *Book, destPath string, sourcePath string)
 func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string) {
 	var documentOneFound, documentTwoFound, documentThreeFound, documentFourFound bool
 
-	versionTen := book.Versions["10.0.0"]
-	if versionTen.Version != "10.0.0" {
-		t.Errorf("Expected 10.0.0, got %s", book.Versions["10.0.0"].Version)
+	versionTen := book.Versions["10"]
+	if versionTen.Version != "10" {
+		t.Errorf("Expected version 10, got version %s", book.Versions["10"].Version)
 	}
 
-	if versionTen.DestPath != fmt.Sprintf("%s/contents/10.0.0", destPath) {
-		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/contents/10.0.0", destPath), versionTen.DestPath)
+	if versionTen.DestPath != fmt.Sprintf("%s/contents/10", destPath) {
+		t.Errorf("Expected %s, got %s", fmt.Sprintf("%s/contents/10", destPath), versionTen.DestPath)
 	}
 
 	if len(versionTen.Docs) != 4 {
 		t.Errorf("Expected 3 docs, got %d", len(versionTen.Docs))
 	}
 
-	expectedSourcePath := fmt.Sprintf("%s/10.0.0", sourcePath)
+	expectedSourcePath := fmt.Sprintf("%s/10", sourcePath)
 	sharedSourcePath := fmt.Sprintf("%s/Shared", sourcePath)
 	for _, doc := range versionTen.Docs {
 
@@ -200,7 +200,7 @@ func checkVersion10(t *testing.T, book *Book, destPath string, sourcePath string
 	}
 
 	if !(documentOneFound && documentTwoFound && documentThreeFound && documentFourFound) {
-		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md, DocumentFour.md in v10.0.0")
+		t.Errorf("Expected DocumentOne.md, DocumentTwo.md, DocumentThree.md, DocumentFour.md in version 10")
 	}
 }
 
@@ -231,7 +231,7 @@ func checkTOC(t *testing.T, book *Book, sourcePath string, destPath string) {
 	got := markdown.Render(doc, renderer)
 	toc := fmt.Sprintf("%s", got)
 
-	expectedTOC := "## 9.0.0\n### Brighter Configuration\n* [Document One](/contents/9.0.0/DocumentOne.md)\n    * [Document Two](/contents/9.0.0/DocumentTwo.md)\n### Darker Configuration\n* [Document Three](/contents/9.0.0/DocumentThree.md)\n## 10.0.0\n### Brighter Configuration\n* [Document One](/contents/10.0.0/DocumentOne.md)\n    * [Document Two](/contents/10.0.0/DocumentTwo.md)\n* [Document Four](/contents/10.0.0/DocumentFour.md)\n### Darker Configuration\n* [Document Three](/contents/10.0.0/DocumentThree.md)\n"
+	expectedTOC := "## 9\n### Brighter Configuration\n* [Document One](/contents/9/DocumentOne.md)\n    * [Document Two](/contents/9/DocumentTwo.md)\n### Darker Configuration\n* [Document Three](/contents/9/DocumentThree.md)\n## 10\n### Brighter Configuration\n* [Document One](/contents/10/DocumentOne.md)\n    * [Document Two](/contents/10/DocumentTwo.md)\n* [Document Four](/contents/10/DocumentFour.md)\n### Darker Configuration\n* [Document Three](/contents/10/DocumentThree.md)\n"
 	if toc != expectedTOC {
 		t.Errorf("Expected %s, got %s", expectedTOC, toc)
 	}
@@ -282,16 +282,16 @@ func TestBookCreation(t *testing.T) {
 					t.Errorf("Error reading directory: %s", err)
 				}
 				for _, entry := range contents {
-					if entry.Name() == "9.0.0" {
-						v9entries, err := os.ReadDir(fmt.Sprintf("%s/contents/9.0.0", destPath))
+					if entry.Name() == "9" {
+						v9entries, err := os.ReadDir(fmt.Sprintf("%s/contents/9", destPath))
 						if err != nil {
 							t.Errorf("Error reading directory: %s", err)
 							v9Found = false
 						} else {
 							v9Found = findFiles(v9entries)
 						}
-					} else if entry.Name() == "10.0.0" {
-						v10entries, err := os.ReadDir(fmt.Sprintf("%s/contents/10.0.0", destPath))
+					} else if entry.Name() == "10" {
+						v10entries, err := os.ReadDir(fmt.Sprintf("%s/contents/10", destPath))
 						if err != nil {
 							t.Errorf("Error reading directory: %s", err)
 							v10Found = false
@@ -313,11 +313,11 @@ func TestBookCreation(t *testing.T) {
 	}
 
 	if v9Found == false {
-		t.Errorf("Expected 9.0.0")
+		t.Errorf("Expected 9")
 	}
 
 	if v10Found == false {
-		t.Errorf("Expected 10.0.0")
+		t.Errorf("Expected 10")
 	}
 
 	// Remove the directory

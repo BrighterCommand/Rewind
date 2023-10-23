@@ -3,21 +3,21 @@
 ### Brighter Configuration
 
 * [Document One](/v9.0.0/DocumentOne.md)
-* [Document Two] (/v9.0.0/DocumentTwo.md)
+* [Document Two] (/9/DocumentTwo.md)
 
 ### Darker Configuration
-* [Document Three] (/v9.0.0/DocumentThree.md)
+* [Document Three] (/9/DocumentThree.md)
 
 ## v10.0.0
 
 ### Brighter Configuration
 
 * [Document One](/v10.0.0/DocumentOne.md)
-* [Document Two] (/v10.0.0/DocumentTwo.md)
-* [Document Four] (/v10.0.0/DocumentFour.md)
+* [Document Two] (/10/DocumentTwo.md)
+* [Document Four] (/10/DocumentFour.md)
 
 ### Darker Configuration
 
-* [Document Three] (/v10.0.0/DocumentThree.md)
+* [Document Three] (/10/DocumentThree.md)
 
 

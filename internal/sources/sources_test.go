@@ -92,11 +92,10 @@ func checkVersions(t *testing.T, sources *Sources) {
 	if len(versions) != 2 {
 		t.Errorf("Expected 2 versions, got %d", len(versions))
 	} else {
-
-		if versions["10.0.0"].Version != "10.0.0" {
-			t.Errorf("Expected 9.0.0, got %s", versions["10.0.0"].Version)
+		if versions["10"].Version != "10" {
+			t.Errorf("Expected 10, got %s", versions["10"].Version)
 		} else {
-			version := versions["10.0.0"]
+			version := versions["10"]
 
 			if version.TOC.Storage == nil || version.TOC.Storage.Name() != ".toc.yaml" {
 				t.Errorf("Expected .toc.yaml, got %s", version.TOC)
@@ -129,10 +128,11 @@ func checkVersions(t *testing.T, sources *Sources) {
 				}
 			}
 		}
-		if versions["9.0.0"].Version != "9.0.0" {
-			t.Errorf("Expected 9.0.0, got %s", versions["9.0.0"].Version)
+
+		if versions["9"].Version != "9" {
+			t.Errorf("Expected 9, got %s", versions["9"].Version)
 		} else {
-			version := versions["9.0.0"]
+			version := versions["9"]
 
 			if version.TOC.Storage == nil || version.TOC.Storage.Name() != ".toc.yaml" {
 				t.Errorf("Expected .toc.yaml, got %s", version.TOC)

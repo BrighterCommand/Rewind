@@ -1,6 +1,8 @@
 package pages
 
-import "os"
+import (
+	"os"
+)
 
 const SummaryFileName = "SUMMARY.md"
 const ContentDirName = "contents"
@@ -69,11 +71,22 @@ type Version struct {
 	Version  string
 }
 
+// Toc A table of contents with a map of names to section within a table of contents.
+type Toc map[string]TOCSection
+
+// OrderedTocSection Versions An ordered array of the sections of the book
 type OrderedTocSection struct {
 	Name    string
+	Order   int
 	Section TOCSection
 }
 
-type Toc map[string]TOCSection
-
+// VersionedToc A map of versions to a table of contents.
 type VersionedToc map[string]Toc
+
+// OrderedVersionTocs The table of contents for a version, ordered by "Version" and "Order"
+type OrderedVersionTocs struct {
+	Version  string
+	Order    int
+	Sections []OrderedTocSection
+}
