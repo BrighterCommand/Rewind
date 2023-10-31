@@ -6,10 +6,12 @@ import (
 
 func TestToSectionSort(t *testing.T) {
 	//arrange
-	var book = make(VersionedToc)
+	var book = VersionedToc{
+		Contents: make(map[string]*Toc),
+	}
 
-	book["9"] = makeVersion9()
-	book["10"] = makeVersion10()
+	book.Contents["9"] = makeVersion9()
+	book.Contents["10"] = makeVersion10()
 
 	//act
 	orderedVersionTocs := book.Sort()
@@ -97,11 +99,13 @@ func checkVersion10(t *testing.T, orderedVersionToc OrderedVersionTocs) {
 	}
 }
 
-func makeVersion9() (toc Toc) {
+func makeVersion9() (toc *Toc) {
 
-	toc = make(Toc)
+	toc = &Toc{
+		Sections: make(map[string]TOCSection),
+	}
 
-	toc["SectionTwo"] = TOCSection{
+	toc.Sections["SectionTwo"] = TOCSection{
 		Order: 10,
 		Entries: []TOCEntry{
 			{
@@ -117,7 +121,7 @@ func makeVersion9() (toc Toc) {
 		},
 	}
 
-	toc["SectionThree"] = TOCSection{
+	toc.Sections["SectionThree"] = TOCSection{
 		Order: 15,
 		Entries: []TOCEntry{
 			{
@@ -133,7 +137,7 @@ func makeVersion9() (toc Toc) {
 		},
 	}
 
-	toc["SectionOne"] = TOCSection{
+	toc.Sections["SectionOne"] = TOCSection{
 		Order: 5,
 		Entries: []TOCEntry{
 			{
@@ -151,11 +155,13 @@ func makeVersion9() (toc Toc) {
 	return toc
 }
 
-func makeVersion10() (toc Toc) {
+func makeVersion10() (toc *Toc) {
 
-	toc = make(Toc)
+	toc = &Toc{
+		Sections: make(map[string]TOCSection),
+	}
 
-	toc["SectionTwo"] = TOCSection{
+	toc.Sections["SectionTwo"] = TOCSection{
 		Order: 10,
 		Entries: []TOCEntry{
 			{
@@ -171,7 +177,7 @@ func makeVersion10() (toc Toc) {
 		},
 	}
 
-	toc["SectionThree"] = TOCSection{
+	toc.Sections["SectionThree"] = TOCSection{
 		Order: 15,
 		Entries: []TOCEntry{
 			{

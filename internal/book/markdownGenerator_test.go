@@ -37,7 +37,7 @@ func TestMarkdownGenerator(t *testing.T) {
 	}, "9")
 
 	markdown := generator.buffer.String()
-	expected := "## 9\n\n### BrighterConfiguration\n\n  * [DocumentOne](/contents/9/DocumentOne.md)\n  * [DocumentTwo](/contents/9/DocumentTwo.md)\n\n### DarkerConfiguration\n\n  * [DocumentThree](/contents/9/DocumentThree.md)\n"
+	expected := "## 9\n\n### BrighterConfiguration\n\n * [DocumentOne](/contents/9/DocumentOne.md)\n * [DocumentTwo](/contents/9/DocumentTwo.md)\n\n### DarkerConfiguration\n\n * [DocumentThree](/contents/9/DocumentThree.md)\n"
 	if !strings.EqualFold(markdown, expected) {
 		t.Errorf("Markdown does not match, expected %s got %s", expected, markdown)
 	}
