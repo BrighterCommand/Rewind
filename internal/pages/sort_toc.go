@@ -5,14 +5,14 @@ import "strconv"
 func (t *VersionedToc) Sort() (ordered []OrderedVersionTocs) {
 
 	//Turn a VersionedToc into an array of OrderedVersionToc
-	for versionName, toc := range *t {
+	for versionName, toc := range t.Contents {
 		order, _ := strconv.Atoi(versionName)
 		orderedVersion := OrderedVersionTocs{
 			Version: versionName,
 			Order:   order,
 		}
 
-		for sectionName, section := range toc {
+		for sectionName, section := range toc.Sections {
 			orderedSection := OrderedTocSection{
 				Name:    sectionName,
 				Section: section,

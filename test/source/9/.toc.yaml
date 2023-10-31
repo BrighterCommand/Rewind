@@ -1,9 +1,10 @@
 ---
-Brighter Configuration:
-  order: 10
-  entries:
-  - name : Document Two
-    file : DocumentTwo.md
-    order: 200
+Sections:
+  Brighter Configuration:
+    order: 10
+    entries:
+    - name : Document Two
+      file : DocumentTwo.md
+      order: 200
 ...
 

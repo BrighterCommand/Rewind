@@ -12,6 +12,8 @@ const ImageFolderName = "images"
 // AssetType Where we have an asset that is not a markdown file what is its type
 type AssetType int
 
+//-- Enumerating Assets -------------------------------------------------------
+
 // An enumerated set of asset types
 const (
 	Undefined AssetType = iota
@@ -49,19 +51,6 @@ type Shared struct {
 	TOC    *Doc
 }
 
-// TOCSection A table of contents section - the name of the section is held in the Toc map below.
-type TOCSection struct {
-	Order   int        `yaml:"order"`
-	Entries []TOCEntry `yaml:"entries"`
-}
-
-// TOCEntry A table of contents entry.
-type TOCEntry struct {
-	Name  string `yaml:"name"`
-	File  string `yaml:"file"`
-	Order int    `yaml:"order"`
-}
-
 // Version Docs & Assets for a version of the book
 type Version struct {
 	DestPath string
@@ -71,8 +60,25 @@ type Version struct {
 	Version  string
 }
 
+// Enumerating TOC Entries ----------------------------------------------------
+
+// TOCEntry A table of contents entry.
+type TOCEntry struct {
+	Name  string `yaml:"name"`
+	File  string `yaml:"file"`
+	Order int    `yaml:"order"`
+}
+
+// TOCSection A table of contents sections - the name of the section is held in the Toc map below.
+type TOCSection struct {
+	Order   int        `yaml:"order"`
+	Entries []TOCEntry `yaml:"entries"`
+}
+
 // Toc A table of contents with a map of names to section within a table of contents.
-type Toc map[string]TOCSection
+type Toc struct {
+	Sections map[string]TOCSection `yaml:"Sections"`
+}
 
 // OrderedTocSection Versions An ordered array of the sections of the book
 type OrderedTocSection struct {
@@ -82,7 +88,9 @@ type OrderedTocSection struct {
 }
 
 // VersionedToc A map of versions to a table of contents.
-type VersionedToc map[string]Toc
+type VersionedToc struct {
+	Contents map[string]*Toc
+}
 
 // OrderedVersionTocs The table of contents for a version, ordered by "Version" and "Order"
 type OrderedVersionTocs struct {

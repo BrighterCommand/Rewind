@@ -19,17 +19,17 @@ We take a directory structure that gives us the shared and versioned documents, 
 source
 - root - the root level files for a GitBook project. Readme, Summary, etc
 - shared - the documentation for Brighter or Darker that is common across all versions. .toc.yaml and .md files
-- 9.0.0 - the documentation for Brighter or Darker that is specific to V9. .toc.yaml and .md files
+- 9 - the documentation for Brighter or Darker that is specific to V9. .toc.yaml and .md files
   - _static\images - any images used by the docs
-- 10.0.0 - the documentation for Brighter or Darker that is specific to v10. .toc.yaml and .md files
+- 10 - the documentation for Brighter or Darker that is specific to v10. .toc.yaml and .md files
   - _static\images - any images used by the docs
  
 We then merge shared with each version and build the Summary.md file which from the .toc.yaml files
 
 docs - the root level files for a GitBook project. Readme, Summary, etc
-- 9.0.0 - the docs for v1
+- 9 - the docs for v1
   - _static\images - any images used by the docs
-- 10.0.0 - the docs for v2
+- 10 - the docs for v2
   - _static\images - any images used by the docs
 
 ## Building the documentation

@@ -27,16 +27,20 @@ var makeBookCmd = &cobra.Command{
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 
+		log.Print("Creating book...")
+		log.Print("Finding sources...")
 		sources, err := findSources(args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		log.Print("Making book...")
 		book, err := book.MakeBook(sources, args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		log.Print("Publishing book...")
 		err = book.Publish()
 		if err != nil {
 			log.Fatal(err)
@@ -45,6 +49,8 @@ var makeBookCmd = &cobra.Command{
 }
 
 func findSources(sourcePath string) (*sources.Sources, error) {
+	log.Print("Finding sources in " + sourcePath + "...")
+
 	src := sources.NewSources()
 	err := src.FindFromPath(sourcePath)
 	if err != nil {

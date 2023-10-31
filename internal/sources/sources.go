@@ -2,13 +2,14 @@ package sources
 
 import (
 	"github.com/brightercommand/Rewind/internal/pages"
+	"log"
 	"os"
 	"strings"
 )
 
 const gitBookFileName = ".gitbook.yaml"
 const tocFileName = ".toc.yaml"
-const shardFolderName = "shared"
+const sharedFolderName = "shared"
 const summaryFolderName = "summary"
 const sharedVersion = "Shared"
 
@@ -50,7 +51,7 @@ func (s *Sources) FindFromPath(root string) error {
 				SourcePath: root,
 				Storage:    entry,
 			}
-		} else if entry.IsDir() && entry.Name() == shardFolderName {
+		} else if entry.IsDir() && entry.Name() == sharedFolderName {
 			shared, err := findShared(root, entry)
 			if err != nil {
 				return err
@@ -185,6 +186,7 @@ func findShared(path string, entry os.DirEntry) (shared *pages.Shared, err error
 
 	sharedPath := path + "/" + entry.Name()
 
+	log.Print("Finding shared docs in " + sharedPath + "...")
 	err = findSharedDocs(sharedPath, shared)
 	if err != nil {
 		return shared, err
@@ -206,6 +208,7 @@ func findVersion(path string, entry os.DirEntry) (version *pages.Version, err er
 	}
 
 	versionPath := path + "/" + entry.Name()
+	log.Print("Finding versioned docs in " + versionPath + "...")
 
 	err = findVersionedDocs(versionPath, version)
 	if err != nil {
