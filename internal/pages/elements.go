@@ -77,14 +77,14 @@ type TOCSection struct {
 
 // Toc A table of contents with a map of names to section within a table of contents.
 type Toc struct {
-	Sections map[string]TOCSection `yaml:"Sections"`
+	Sections map[string]*TOCSection `yaml:"Sections"`
 }
 
 // OrderedTocSection Versions An ordered array of the sections of the book
 type OrderedTocSection struct {
 	Name    string
 	Order   int
-	Section TOCSection
+	Section *TOCSection
 }
 
 // VersionedToc A map of versions to a table of contents.
